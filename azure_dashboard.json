@@ -1,0 +1,1432 @@
+{
+  "lenses": [
+    {
+      "order": 0,
+      "parts": [
+        {
+          "position": {
+            "x": 0,
+            "y": 0,
+            "colSpan": 12,
+            "rowSpan": 1
+          },
+          "metadata": {
+            "inputs": [],
+            "type": "Extension/HubsExtension/PartType/MarkdownPart",
+            "settings": {
+              "content": {
+                "settings": {
+                  "content": "# ViaSmiles Email Delivery Dashboard\nPer-clinic send volume, delivery status, and the full individual recipient report, pulled live from `law-claraportemail`.",
+                  "title": "",
+                  "subtitle": ""
+                }
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 1,
+            "colSpan": 4,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "kpi-delivered",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where DeliveryStatus == \"Delivered\"\n| summarize Delivered = count()",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Table",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Emails Delivered (7d)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where DeliveryStatus == \"Delivered\"\n| summarize Delivered = count()",
+                "ControlType": "AnalyticsGrid",
+                "SpecificChart": "Table"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 4,
+            "y": 1,
+            "colSpan": 4,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "kpi-failed",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where DeliveryStatus in (\"Bounced\", \"Failed\")\n| summarize Failed = count()",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Table",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Emails Failed / Bounced (7d)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where DeliveryStatus in (\"Bounced\", \"Failed\")\n| summarize Failed = count()",
+                "ControlType": "AnalyticsGrid",
+                "SpecificChart": "Table"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 8,
+            "y": 1,
+            "colSpan": 4,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "kpi-suppressed",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where DeliveryStatus in (\"Suppressed\", \"Quarantined\")\n| summarize Suppressed = count()",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Table",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Suppressed / Quarantined (7d)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where DeliveryStatus in (\"Suppressed\", \"Quarantined\")\n| summarize Suppressed = count()",
+                "ControlType": "AnalyticsGrid",
+                "SpecificChart": "Table"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 4,
+            "colSpan": 6,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "kpi-viewed",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailUserEngagementOperational\n| where TimeGenerated > ago(7d)\n| where EngagementType == \"View\"\n| summarize Viewed = count()",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Table",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Viewed / Opened (7d)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailUserEngagementOperational\n| where TimeGenerated > ago(7d)\n| where EngagementType == \"View\"\n| summarize Viewed = count()",
+                "ControlType": "AnalyticsGrid",
+                "SpecificChart": "Table"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 6,
+            "y": 4,
+            "colSpan": 6,
+            "rowSpan": 3
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "kpi-clicked",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailUserEngagementOperational\n| where TimeGenerated > ago(7d)\n| where EngagementType == \"Click\"\n| summarize Clicked = count()",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Table",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Clicked (7d)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailUserEngagementOperational\n| where TimeGenerated > ago(7d)\n| where EngagementType == \"Click\"\n| summarize Clicked = count()",
+                "ControlType": "AnalyticsGrid",
+                "SpecificChart": "Table"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 7,
+            "colSpan": 12,
+            "rowSpan": 4
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "volume-timechart",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| summarize Count = count() by bin(TimeGenerated, 12h), DeliveryStatus\n| order by TimeGenerated asc",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Line",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Email Volume by Delivery Status (7d, 12h buckets)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "value": {
+                  "xAxis": {
+                    "name": "TimeGenerated",
+                    "type": "datetime"
+                  },
+                  "yAxis": [
+                    {
+                      "name": "Count",
+                      "type": "long"
+                    }
+                  ],
+                  "splitBy": [
+                    {
+                      "name": "DeliveryStatus",
+                      "type": "string"
+                    }
+                  ],
+                  "aggregation": "Sum"
+                },
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "value": {
+                  "isEnabled": true,
+                  "position": "Bottom"
+                },
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| summarize Count = count() by bin(TimeGenerated, 12h), DeliveryStatus\n| order by TimeGenerated asc",
+                "ControlType": "FrameControlChart",
+                "SpecificChart": "Line"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 11,
+            "colSpan": 6,
+            "rowSpan": 4
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "pie-status",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| summarize Count = count() by DeliveryStatus\n| order by Count desc",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Pie",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Delivery Status Breakdown (7d)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "value": {
+                  "xAxis": {
+                    "name": "DeliveryStatus",
+                    "type": "string"
+                  },
+                  "yAxis": [
+                    {
+                      "name": "Count",
+                      "type": "long"
+                    }
+                  ],
+                  "aggregation": "Sum"
+                },
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "value": {
+                  "isEnabled": true,
+                  "position": "Bottom"
+                },
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| summarize Count = count() by DeliveryStatus\n| order by Count desc",
+                "ControlType": "FrameControlChart",
+                "SpecificChart": "Pie"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 6,
+            "y": 11,
+            "colSpan": 6,
+            "rowSpan": 4
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "pie-clinic",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| summarize Count = count() by Clinic\n| order by Count desc",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Pie",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Volume Share by Clinic (7d)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "value": {
+                  "xAxis": {
+                    "name": "Clinic",
+                    "type": "string"
+                  },
+                  "yAxis": [
+                    {
+                      "name": "Count",
+                      "type": "long"
+                    }
+                  ],
+                  "aggregation": "Sum"
+                },
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "value": {
+                  "isEnabled": true,
+                  "position": "Bottom"
+                },
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| summarize Count = count() by Clinic\n| order by Count desc",
+                "ControlType": "FrameControlChart",
+                "SpecificChart": "Pie"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 15,
+            "colSpan": 12,
+            "rowSpan": 4
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "column-clinic-status",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| summarize Count = count() by Clinic, DeliveryStatus\n| order by Clinic asc",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "StackedColumn",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Volume by Clinic and Status (7d)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "value": {
+                  "xAxis": {
+                    "name": "Clinic",
+                    "type": "string"
+                  },
+                  "yAxis": [
+                    {
+                      "name": "Count",
+                      "type": "long"
+                    }
+                  ],
+                  "splitBy": [
+                    {
+                      "name": "DeliveryStatus",
+                      "type": "string"
+                    }
+                  ],
+                  "aggregation": "Sum"
+                },
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "value": {
+                  "isEnabled": true,
+                  "position": "Bottom"
+                },
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| summarize Count = count() by Clinic, DeliveryStatus\n| order by Clinic asc",
+                "ControlType": "FrameControlChart",
+                "SpecificChart": "StackedColumn"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 19,
+            "colSpan": 12,
+            "rowSpan": 4
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "clinic-breakdown",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| summarize Delivered = countif(DeliveryStatus == \"Delivered\"), Other = countif(DeliveryStatus != \"Delivered\") by SenderDomain, SenderUsername\n| order by SenderDomain asc",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Table",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Delivery by Clinic (SenderDomain / SenderUsername)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| summarize Delivered = countif(DeliveryStatus == \"Delivered\"), Other = countif(DeliveryStatus != \"Delivered\") by SenderDomain, SenderUsername\n| order by SenderDomain asc",
+                "ControlType": "AnalyticsGrid",
+                "SpecificChart": "Table"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 23,
+            "colSpan": 12,
+            "rowSpan": 6
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "individual-report",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| project TimeGenerated, RecipientId, SenderDomain, SenderUsername, DeliveryStatus, FailureReason, SmtpStatusCode\n| order by TimeGenerated desc",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Table",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Individual Recipient Delivery Report (7d)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated > ago(7d)\n| where isnotempty(RecipientId)\n| project TimeGenerated, RecipientId, SenderDomain, SenderUsername, DeliveryStatus, FailureReason, SmtpStatusCode\n| order by TimeGenerated desc",
+                "ControlType": "AnalyticsGrid",
+                "SpecificChart": "Table"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 29,
+            "colSpan": 12,
+            "rowSpan": 6
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "individual-engagement-report",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailUserEngagementOperational\n| where TimeGenerated > ago(7d)\n| project TimeGenerated, RecipientId, EngagementType, InternetMessageId, UserAgent\n| order by TimeGenerated desc",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Table",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Individual Engagement Report - Views & Clicks (7d)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailUserEngagementOperational\n| where TimeGenerated > ago(7d)\n| project TimeGenerated, RecipientId, EngagementType, InternetMessageId, UserAgent\n| order by TimeGenerated desc",
+                "ControlType": "AnalyticsGrid",
+                "SpecificChart": "Table"
+              }
+            }
+          }
+        },
+        {
+          "position": {
+            "x": 0,
+            "y": 35,
+            "colSpan": 6,
+            "rowSpan": 4
+          },
+          "metadata": {
+            "inputs": [
+              {
+                "name": "resourceTypeMode",
+                "isOptional": true
+              },
+              {
+                "name": "ComponentId",
+                "isOptional": true
+              },
+              {
+                "name": "Scope",
+                "value": {
+                  "resourceIds": [
+                    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "PartId",
+                "value": "pie-engagement-type",
+                "isOptional": true
+              },
+              {
+                "name": "Version",
+                "value": "2.0",
+                "isOptional": true
+              },
+              {
+                "name": "TimeRange",
+                "value": "P7D",
+                "isOptional": true
+              },
+              {
+                "name": "DashboardId",
+                "isOptional": true
+              },
+              {
+                "name": "DraftRequestParameters",
+                "isOptional": true
+              },
+              {
+                "name": "Query",
+                "value": "ACSEmailUserEngagementOperational\n| where TimeGenerated > ago(7d)\n| summarize Count = count() by EngagementType\n| order by Count desc",
+                "isOptional": true
+              },
+              {
+                "name": "ControlType",
+                "value": "FrameControlChart",
+                "isOptional": true
+              },
+              {
+                "name": "SpecificChart",
+                "value": "Pie",
+                "isOptional": true
+              },
+              {
+                "name": "PartTitle",
+                "value": "Engagement Type Breakdown (7d)",
+                "isOptional": true
+              },
+              {
+                "name": "PartSubTitle",
+                "value": "law-claraportemail",
+                "isOptional": true
+              },
+              {
+                "name": "Dimensions",
+                "value": {
+                  "aggregation": "Sum",
+                  "xAxis": {
+                    "name": "EngagementType",
+                    "type": "string"
+                  },
+                  "yAxis": [
+                    {
+                      "name": "Count",
+                      "type": "long"
+                    }
+                  ]
+                },
+                "isOptional": true
+              },
+              {
+                "name": "LegendOptions",
+                "value": {
+                  "isEnabled": true,
+                  "position": "Bottom"
+                },
+                "isOptional": true
+              },
+              {
+                "name": "IsQueryContainTimeRange",
+                "value": false,
+                "isOptional": true
+              }
+            ],
+            "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart",
+            "settings": {
+              "content": {
+                "Query": "ACSEmailUserEngagementOperational\n| where TimeGenerated > ago(7d)\n| summarize Count = count() by EngagementType\n| order by Count desc",
+                "ControlType": "FrameControlChart",
+                "SpecificChart": "Pie"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "model": {
+      "timeRange": {
+        "value": {
+          "relative": {
+            "duration": 7,
+            "timeUnit": 4
+          }
+        },
+        "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+      },
+      "filterLocale": {
+        "value": "en-us"
+      },
+      "filters": {
+        "value": {
+          "MsPortalFx_TimeRange": {
+            "model": {
+              "format": "utc",
+              "granularity": "auto",
+              "relative": "7d"
+            },
+            "displayCache": {
+              "name": "UTC Time",
+              "value": "Past 7 days"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+azure-functions
+databricks-sql-connector
+azure-identity
+azure-keyvault-secrets

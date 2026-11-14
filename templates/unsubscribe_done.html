@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>You're unsubscribed — ViaSmiles</title>
+<link href="https://fonts.googleapis.com/css?family=Outfit:400,500,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#182D4F; --cyan:#35C3EB; --slate:#304476;
+    --ice:#E6F3FA; --border:#D7E5ED; --bg:#EEF4F8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:0; background:var(--bg);
+    font-family:'Outfit',Arial,Helvetica,sans-serif;
+    color:var(--slate);
+  }
+  .wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
+  .card{
+    width:100%; max-width:480px; background:#FFFFFF; border-radius:10px;
+    box-shadow:0 4px 24px rgba(24,45,79,0.08); overflow:hidden;
+  }
+  .card-body{padding:40px 32px; text-align:center;}
+  .check{
+    width:56px; height:56px; border-radius:50%; background:var(--ice);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 20px auto;
+  }
+  h1{margin:0 0 12px 0; font-size:22px; font-weight:600; color:var(--navy); line-height:29px;}
+  p{margin:0 0 8px 0; font-size:15px; line-height:23px;}
+  .email-pill{
+    display:inline-block; margin:14px 0 6px 0; padding:8px 16px;
+    background:var(--ice); border:1px solid var(--border); border-radius:20px;
+    font-size:14px; font-weight:500; color:var(--navy); word-break:break-all;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="card-body">
+      <div class="check">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+          <path d="M20 6L9 17l-5-5" stroke="#182D4F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1>You've been unsubscribed</h1>
+      <p>We've removed this address from future emails:</p>
+      <div class="email-pill">{email}</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

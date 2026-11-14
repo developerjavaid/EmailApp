@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ViaSmiles EmailApp — Documentation</title>
+<style>
+  :root{
+    --navy:#182D4F; --cyan:#35C3EB; --slate:#304476; --ice:#E6F3FA;
+    --border:#D7E5ED; --bg:#F5F8FA; --code-bg:#0F1A2B; --code-fg:#D7E5ED;
+    --ok:#1a7f37; --warn:#9a6700; --danger:#b0271b;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#10161F; --ice:#16202E; --border:#2B3A4D; --slate:#C9D4E3; }
+    body{ background:var(--bg); color:#E6EDF3; }
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--slate);line-height:1.6;}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px 80px;}
+  header.page{background:var(--navy);color:#fff;padding:48px 20px 40px;}
+  header.page .wrap{padding:0 20px;}
+  header.page h1{margin:0 0 6px;font-size:30px;}
+  header.page p{margin:0;color:#C9D4E3;font-size:15px;}
+  nav.toc{background:#fff;border:1px solid var(--border);border-radius:8px;padding:18px 24px;margin:-28px 0 36px;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+  @media (prefers-color-scheme: dark){ nav.toc{background:#16202E;} }
+  nav.toc h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--navy);margin:0 0 10px;}
+  @media (prefers-color-scheme: dark){ nav.toc h2{color:#9fd4ec;} }
+  nav.toc ol{columns:2;margin:0;padding-left:20px;font-size:14px;}
+  nav.toc a{color:var(--navy);text-decoration:none;}
+  @media (prefers-color-scheme: dark){ nav.toc a{color:#9fd4ec;} }
+  nav.toc a:hover{text-decoration:underline;}
+  section{margin:40px 0;}
+  h2{color:var(--navy);border-bottom:2px solid var(--cyan);padding-bottom:8px;font-size:23px;}
+  @media (prefers-color-scheme: dark){ h2{color:#9fd4ec;} }
+  h3{color:var(--navy);font-size:18px;margin-top:28px;}
+  @media (prefers-color-scheme: dark){ h3{color:#9fd4ec;} }
+  code{background:var(--ice);padding:2px 6px;border-radius:4px;font-size:.92em;font-family:"SF Mono",Consolas,monospace;}
+  pre{background:var(--code-bg);color:var(--code-fg);padding:16px 18px;border-radius:8px;overflow-x:auto;font-size:13.5px;line-height:1.55;}
+  pre code{background:none;padding:0;color:inherit;}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14.5px;}
+  th,td{border:1px solid var(--border);padding:8px 12px;text-align:left;vertical-align:top;}
+  th{background:var(--ice);color:var(--navy);}
+  @media (prefers-color-scheme: dark){ th{color:#9fd4ec;} }
+  .badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:12px;font-weight:600;color:#fff;}
+  .badge.ok{background:var(--ok);} .badge.warn{background:var(--warn);} .badge.danger{background:var(--danger);}
+  .callout{border-left:4px solid var(--cyan);background:var(--ice);padding:12px 18px;border-radius:0 6px 6px 0;margin:16px 0;}
+  .callout.warn{border-left-color:var(--warn);}
+  .callout.danger{border-left-color:var(--danger);}
+  .flow{font-family:"SF Mono",Consolas,monospace;font-size:13px;background:var(--ice);border:1px solid var(--border);border-radius:8px;padding:18px;white-space:pre;overflow-x:auto;}
+  ul,ol{padding-left:22px;}
+  a{color:var(--navy);}
+  @media (prefers-color-scheme: dark){ a{color:#9fd4ec;} }
+  footer{text-align:center;font-size:13px;color:#8a97a8;margin-top:60px;}
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="wrap">
+    <h1>ViaSmiles EmailApp — End-to-End Documentation</h1>
+    <p>Azure Functions app: reads customers from Databricks Unity Catalog, sends branded campaign emails via Azure Communication Services, and records unsubscribes back to Unity Catalog. Last updated 2026-10-13.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#overview">Overview &amp; Architecture</a></li>
+    <li><a href="#repo">Repository Layout</a></li>
+    <li><a href="#data-model">Data Model (Unity Catalog)</a></li>
+    <li><a href="#campaigns">Campaigns &amp; Templates</a></li>
+    <li><a href="#unsubscribe">Unsubscribe Flow (CTA → DB)</a></li>
+    <li><a href="#config">Configuration Reference</a></li>
+    <li><a href="#dev-setup">Local Development Setup</a></li>
+    <li><a href="#dry-run">Dry Run / Local Test</a></li>
+    <li><a href="#deploy">Creating &amp; Deploying the Azure Function</a></li>
+    <li><a href="#testing">Test Cases (Cloud)</a></li>
+    <li><a href="#production">Running in Production</a></li>
+    <li><a href="#security">Secrets &amp; Security Notes</a></li>
+    <li><a href="#troubleshooting">Troubleshooting Log</a></li>
+    <li><a href="#new-clinic">Adding a New Clinic / Campaign</a></li>
+  </ol>
+</nav>
+
+<section id="overview">
+<h2>1. Overview &amp; Architecture</h2>
+<p>This is a Python Azure Functions app (v2 programming model, <code>azure.functions</code>) with no separate web framework. It has three triggers:</p>
+<ul>
+  <li><strong>HTTP <code>POST /api/send-customer-emails</code></strong> — reads eligible customers for a campaign from Databricks, renders the campaign's HTML template per recipient, and sends via Azure Communication Services (ACS) SMTP.</li>
+  <li><strong>Timer trigger</strong> (<code>TIMER_SCHEDULE</code>, default daily 8am UTC) — runs the same send logic automatically for the default campaign.</li>
+  <li><strong>HTTP <code>GET/POST /api/unsubscribe</code></strong> (anonymous auth) — the landing page behind the email's "Unsubscribe" link. <code>GET</code> shows a confirm page; <code>POST</code> (the confirm button) records the opt-out in Unity Catalog.</li>
+</ul>
+
+<div class="flow">Databricks Unity Catalog (claraport_ws)
+  ├─ prd_viasmiles_email.customer          (production recipients)
+  └─ viasmiles_campaigns.customer_test     (safe test recipients)
+  └─ viasmiles_campaigns.unsubscribe_list  (opt-out log, shared across campaigns)
+        │
+        │  fetch_customers() — LEFT ANTI JOIN excludes unsubscribed emails
+        ▼
+  send_customer_emails  (HTTP trigger, also daily timer)
+        │  renders templates/&lt;campaign&gt;.html with {{first_name}} {{last_name}}
+        │  {{clinic_city}} {{clinic_phone}} {{booking_link}} {{unsubscribe_link}}
+        ▼
+  Azure Communication Services SMTP (smtp.azurecomm.net:587)
+        ▼
+  Recipient inbox — clicks "Unsubscribe" in the footer
+        ▼
+  GET /api/unsubscribe  → confirm page (HMAC token verified, no DB write yet)
+        │  recipient clicks "Confirm unsubscribe"
+        ▼
+  POST /api/unsubscribe → MERGE INTO unsubscribe_list (idempotent)
+        ▼
+  Next send excludes this email automatically (anti-join)</div>
+
+<p>Authentication throughout uses one shared Microsoft Entra ID (Azure AD) <strong>service principal</strong> for both Databricks (<code>auth_type="azure-sp-m2m"</code>) and ACS SMTP (the SMTP "password" is the raw Entra client secret; ACS exchanges it for a token server-side). Secrets are intended to live in Azure Key Vault, fetched via the Function App's managed identity — see <a href="#security">§12</a> for the current interim workaround.</p>
+</section>
+
+<section id="repo">
+<h2>2. Repository Layout</h2>
+<table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td><code>function_app.py</code></td><td>Entry point. HTTP routes (<code>send-customer-emails</code>, <code>unsubscribe</code>) and the daily timer trigger.</td></tr>
+<tr><td><code>campaigns.py</code></td><td>Per-clinic/campaign registry: Databricks schema/table, template file, subject, clinic merge tags (city/phone/booking link). Add a new clinic here.</td></tr>
+<tr><td><code>db_utils.py</code></td><td>Databricks SQL connection, <code>fetch_customers()</code>, <code>mark_unsubscribed()</code>.</td></tr>
+<tr><td><code>email_utils.py</code></td><td><code>send_email()</code> — SMTP send via ACS.</td></tr>
+<tr><td><code>unsubscribe_utils.py</code></td><td>HMAC-SHA256 sign/verify for unsubscribe link tokens.</td></tr>
+<tr><td><code>config.py</code></td><td><code>get_secret()</code> — Key Vault lookup, with an App Settings override fallback (see §12).</td></tr>
+<tr><td><code>send_template_email.py</code></td><td>Standalone script: send the template to a hardcoded test list without touching Databricks.</td></tr>
+<tr><td><code>send_test_email.py</code></td><td>Standalone script: plain-text test send.</td></tr>
+<tr><td><code>templates/</code></td><td>HTML templates (merge-tag driven) + the unsubscribe confirm/done pages.</td></tr>
+<tr><td><code>host.json</code></td><td>Azure Functions host configuration.</td></tr>
+<tr><td><code>local.settings.json</code></td><td>Local-only env values (gitignored, never deployed).</td></tr>
+<tr><td><code>.funcignore</code></td><td>Excludes <code>.venv</code>, caches, local secrets from the deploy package.</td></tr>
+<tr><td><code>requirements.txt</code></td><td>Python dependencies (<code>azure-functions</code>, <code>databricks-sql-connector</code>, <code>azure-identity</code>, <code>azure-keyvault-secrets</code>).</td></tr>
+</table>
+</section>
+
+<section id="data-model">
+<h2>3. Data Model (Unity Catalog)</h2>
+<p>Catalog: <code>claraport_ws</code>. Two schemas are in play:</p>
+
+<h3>3.1 Production recipient schema</h3>
+<pre><code>CREATE SCHEMA IF NOT EXISTS claraport_ws.prd_viasmiles_email;
+
+CREATE TABLE IF NOT EXISTS claraport_ws.prd_viasmiles_email.customer (
+  fname STRING,
+  lname STRING,
+  email STRING
+);</code></pre>
+
+<h3>3.2 Campaigns schema (test table + unsubscribe log)</h3>
+<pre><code>CREATE SCHEMA IF NOT EXISTS claraport_ws.viasmiles_campaigns;
+
+CREATE TABLE IF NOT EXISTS claraport_ws.viasmiles_campaigns.customer_test (
+  fname STRING,
+  lname STRING,
+  email STRING
+);
+
+CREATE TABLE IF NOT EXISTS claraport_ws.viasmiles_campaigns.unsubscribe_list (
+  email STRING,
+  campaign STRING,
+  source STRING,
+  unsubscribed_at TIMESTAMP
+);</code></pre>
+
+<h3>3.3 Grants (service principal: <code>d97d0f55-a968-43a0-94c6-5d433ac05874</code>)</h3>
+<pre><code>GRANT USE CATALOG ON CATALOG claraport_ws TO `d97d0f55-a968-43a0-94c6-5d433ac05874`;
+
+GRANT USE SCHEMA ON SCHEMA claraport_ws.prd_viasmiles_email TO `d97d0f55-a968-43a0-94c6-5d433ac05874`;
+GRANT SELECT, MODIFY ON TABLE claraport_ws.prd_viasmiles_email.customer TO `d97d0f55-a968-43a0-94c6-5d433ac05874`;
+
+GRANT USE SCHEMA ON SCHEMA claraport_ws.viasmiles_campaigns TO `d97d0f55-a968-43a0-94c6-5d433ac05874`;
+GRANT SELECT, MODIFY ON TABLE claraport_ws.viasmiles_campaigns.customer_test TO `d97d0f55-a968-43a0-94c6-5d433ac05874`;
+GRANT SELECT, MODIFY ON TABLE claraport_ws.viasmiles_campaigns.unsubscribe_list TO `d97d0f55-a968-43a0-94c6-5d433ac05874`;</code></pre>
+
+<h3>3.4 Seed a test row</h3>
+<pre><code>INSERT INTO claraport_ws.viasmiles_campaigns.customer_test (fname, lname, email)
+VALUES ('Test', 'User', 'jvm@analyticsintellect.com');</code></pre>
+
+<div class="callout">
+<strong>Why a separate <code>unsubscribe_list</code> table instead of a boolean column?</strong>
+It gives a durable, queryable log of who opted out, when, and from which campaign/source — not just a flag that can be silently overwritten. <code>fetch_customers()</code> does a <code>LEFT ANTI JOIN</code> against it so opt-outs apply across every campaign automatically.
+</div>
+</section>
+
+<section id="campaigns">
+<h2>4. Campaigns &amp; Templates</h2>
+<p><code>campaigns.py</code> is the single place that maps a campaign id to its data source and its template:</p>
+<pre><code>CAMPAIGNS = {
+    "viasmiles_acquisition_v1": {
+        "schema": "prd_viasmiles_email",
+        "table": "customer",
+        "template": "viasmiles_acquisition_email_v1.1.html",
+        "subject": "Your free implant consultation, 3D CT scan included",
+        "merge_tags": {
+            "clinic_city": "Columbus",
+            "clinic_phone": "(614) 999-1500",
+            "booking_link": "https://viasmiles.com/book-consultation/",
+        },
+    },
+    "viasmiles_test": { ... points at viasmiles_campaigns.customer_test ... },
+}</code></pre>
+<p>Merge tags filled in at send time, per recipient, from the Databricks row plus the campaign config:</p>
+<table>
+<tr><th>Tag</th><th>Source</th></tr>
+<tr><td><code>{{first_name}}</code></td><td><code>customer.fname</code> (falls back to "there" if blank)</td></tr>
+<tr><td><code>{{last_name}}</code></td><td><code>customer.lname</code></td></tr>
+<tr><td><code>{{clinic_city}}</code>, <code>{{clinic_phone}}</code>, <code>{{booking_link}}</code></td><td>Static per campaign, from <code>campaigns.py</code></td></tr>
+<tr><td><code>{{unsubscribe_link}}</code></td><td>Generated per recipient: HMAC-signed token + <code>APP_BASE_URL</code></td></tr>
+</table>
+<p>Trigger a specific campaign manually with a query parameter:</p>
+<pre><code>curl -X POST "https://viasmiles-email-function.azurewebsites.net/api/send-customer-emails?campaign=viasmiles_acquisition_v1&amp;code=&lt;function-key&gt;"</code></pre>
+<p>If <code>TEST_MODE=true</code> is set as an app setting, the campaign is force-redirected to <code>viasmiles_test</code> regardless of the query parameter — a safety switch so a misfired production trigger can't email the real list.</p>
+</section>
+
+<section id="unsubscribe">
+<h2>5. Unsubscribe Flow (CTA click → database)</h2>
+<ol>
+<li>Email footer contains: <code>&lt;a href="{{unsubscribe_link}}"&gt;Unsubscribe&lt;/a&gt;</code> (see <code>templates/viasmiles_acquisition_email_v1.1.html</code>, footer section).</li>
+<li>The link format: <code>{APP_BASE_URL}/api/unsubscribe?email=&lt;url-encoded email&gt;&amp;token=&lt;hmac-sha256 hex&gt;</code>, generated by <code>unsubscribe_utils.generate_token()</code>, keyed by the <code>unsubscribe-signing-key</code> secret.</li>
+<li><strong>GET</strong> request (the click itself) verifies the token and renders a confirm page — it does <em>not</em> write to the database yet. This is deliberate: corporate email scanners and link-prefetchers follow GET links automatically, which would silently opt people out if a GET alone triggered the unsubscribe.</li>
+<li>The recipient clicks <strong>"Confirm unsubscribe"</strong>, which submits a <strong>POST</strong> with the same email + token.</li>
+<li>POST handler re-verifies the token, then calls <code>mark_unsubscribed(email, campaign)</code>, which runs a <code>MERGE INTO unsubscribe_list</code> — idempotent, so repeated clicks never create duplicate rows or move the timestamp.</li>
+<li>Renders <code>templates/unsubscribe_done.html</code> as the final confirmation page.</li>
+</ol>
+<p>Verify a recorded unsubscribe directly in Databricks:</p>
+<pre><code>SELECT * FROM claraport_ws.viasmiles_campaigns.unsubscribe_list
+WHERE email = 'someone@example.com';</code></pre>
+</section>
+
+<section id="config">
+<h2>6. Configuration Reference (App Settings / <code>local.settings.json</code>)</h2>
+<table>
+<tr><th>Setting</th><th>Example</th><th>Notes</th></tr>
+<tr><td><code>FUNCTIONS_WORKER_RUNTIME</code></td><td><code>python</code></td><td>Required by Azure Functions host.</td></tr>
+<tr><td><code>AzureWebJobsStorage</code></td><td>storage connection string</td><td>Must be a real connection string in Azure (local dev can use <code>UseDevelopmentStorage=true</code> if Azurite is running, otherwise HTTP-trigger testing still works but the timer trigger's listener will show unhealthy).</td></tr>
+<tr><td><code>TIMER_SCHEDULE</code></td><td><code>0 0 8 * * *</code></td><td>Daily timer NCRONTAB expression (UTC).</td></tr>
+<tr><td><code>APP_BASE_URL</code></td><td><code>https://viasmiles-email-function.azurewebsites.net</code></td><td>Used to build unsubscribe links. <strong>Set this per-environment</strong> — local dev uses <code>http://localhost:7071</code>; the deployed app must use its real public URL, set directly in Azure App Settings (never pulled from <code>local.settings.json</code>, which is not deployed).</td></tr>
+<tr><td><code>DATABRICKS_SERVER_HOSTNAME</code></td><td><code>adb-7405605860283973.13.azuredatabricks.net</code></td><td>SQL warehouse hostname.</td></tr>
+<tr><td><code>DATABRICKS_HTTP_PATH</code></td><td><code>/sql/1.0/warehouses/3fd364899555d7d7</code></td><td>SQL warehouse HTTP path.</td></tr>
+<tr><td><code>DATABRICKS_CATALOG</code></td><td><code>claraport_ws</code></td><td>Unity Catalog name.</td></tr>
+<tr><td><code>DATABRICKS_SCHEMA</code> / <code>DATABRICKS_TABLE</code></td><td><code>prd_viasmiles_email</code> / <code>customer</code></td><td>Default production campaign's table (see <code>campaigns.py</code>).</td></tr>
+<tr><td><code>DATABRICKS_CAMPAIGN_SCHEMA</code></td><td><code>viasmiles_campaigns</code></td><td>Schema holding the test table and the unsubscribe log.</td></tr>
+<tr><td><code>DATABRICKS_TEST_TABLE</code></td><td><code>customer_test</code></td><td>Safe sandbox recipient table.</td></tr>
+<tr><td><code>DATABRICKS_UNSUBSCRIBE_TABLE</code></td><td><code>unsubscribe_list</code></td><td>Opt-out log table.</td></tr>
+<tr><td><code>DATABRICKS_AUTH_TYPE</code></td><td><code>service_principal</code></td><td>Or <code>token</code> for a Databricks PAT (then set the <code>databricks-token</code> secret).</td></tr>
+<tr><td><code>TEST_MODE</code></td><td><code>true</code> / <code>false</code></td><td><strong>Safety switch.</strong> <code>true</code> forces every send to use the <code>viasmiles_test</code> campaign/table. Must be <code>false</code> in production.</td></tr>
+<tr><td><code>DEFAULT_CAMPAIGN</code></td><td><code>viasmiles_acquisition_v1</code></td><td>Campaign used by the timer trigger and when no <code>?campaign=</code> query param is given.</td></tr>
+<tr><td><code>SEND_DELAY_SECONDS</code></td><td><code>2</code></td><td>Delay between consecutive sends to avoid ACS SMTP throttling (<code>Connection refused</code> on rapid repeated connections).</td></tr>
+<tr><td><code>AAD_TENANT_ID</code> / <code>AAD_CLIENT_ID</code></td><td>Entra tenant/app IDs</td><td>Shared service principal for Databricks + ACS auth.</td></tr>
+<tr><td><code>KEY_VAULT_URL</code></td><td><code>https://email-vault.vault.azure.net/</code></td><td>Vault holding secrets.</td></tr>
+<tr><td><code>ACS_SMTP_HOST</code> / <code>ACS_SMTP_PORT</code></td><td><code>smtp.azurecomm.net</code> / <code>587</code></td><td>ACS SMTP relay.</td></tr>
+<tr><td><code>ACS_SMTP_USERNAME</code></td><td><code>ViaSmile-Smtp</code></td><td>SMTP username configured under the Communication Services resource.</td></tr>
+<tr><td><code>ACS_SENDER_ADDRESS</code></td><td><code>hello-exton@viasmiles.com</code></td><td>Must be a verified MailFrom address on a domain <strong>connected</strong> to this Communication Services resource (see §13.3).</td></tr>
+</table>
+
+<h3>6.1 Secrets (Key Vault, with App Settings override)</h3>
+<table>
+<tr><th>Secret name</th><th>Used for</th><th>App Settings override name</th></tr>
+<tr><td><code>aad-client-secret-value</code></td><td>Databricks + ACS SMTP auth (same Entra app)</td><td><code>AAD_CLIENT_SECRET_VALUE</code></td></tr>
+<tr><td><code>unsubscribe-signing-key</code></td><td>HMAC key for unsubscribe link tokens</td><td><code>UNSUBSCRIBE_SIGNING_KEY</code></td></tr>
+<tr><td><code>databricks-token</code></td><td>Only if <code>DATABRICKS_AUTH_TYPE=token</code></td><td><code>DATABRICKS_TOKEN</code></td></tr>
+</table>
+<p>See <a href="#security">§12</a> for why the override exists and when to remove it.</p>
+</section>
+
+<section id="dev-setup">
+<h2>7. Local Development Setup</h2>
+<pre><code># 1. Python env
+python3 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+
+# 2. Azure CLI login (headless/root shells can't launch a browser)
+az login --use-device-code
+
+# 3. Azure Functions Core Tools — use apt, NOT npm (npm installer breaks on
+#    Node 18 with ERR_REQUIRE_ESM)
+curl -sSL https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb \
+  -o packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb &amp;&amp; rm packages-microsoft-prod.deb
+sudo apt-get update &amp;&amp; sudo apt-get install azure-functions-core-tools-4</code></pre>
+<p>Fill in <code>local.settings.json</code> with the values from §6 (a working example already lives in this repo for local dev — do not commit real secrets to git; <code>local.settings.json</code> is gitignored).</p>
+</section>
+
+<section id="dry-run">
+<h2>8. Dry Run / Local Test</h2>
+<pre><code># Terminal 1 — start the Functions host
+func start
+
+# Terminal 2 — trigger a send (reads from whatever TEST_MODE routes to)
+curl -i -X POST "http://localhost:7071/api/send-customer-emails"</code></pre>
+<p>Expected response: <code>Sent: N, Failed: 0. Failed addresses: []</code>. Full tracebacks for any failure appear in the <code>func start</code> terminal (not in the HTTP response) — this is the fastest way to debug locally, since Azure's own remote log streaming is unreliable on a Linux Consumption plan (see §13.1).</p>
+<p>To test a specific campaign:</p>
+<pre><code>curl -i -X POST "http://localhost:7071/api/send-customer-emails?campaign=viasmiles_acquisition_v1"</code></pre>
+<p>To test the unsubscribe landing page:</p>
+<ol>
+<li>Open the received email, click "Unsubscribe" in the footer.</li>
+<li>Confirm page loads at <code>http://localhost:7071/api/unsubscribe?email=...&amp;token=...</code>.</li>
+<li>Click "Confirm unsubscribe".</li>
+<li>Check the row landed: <code>SELECT * FROM claraport_ws.viasmiles_campaigns.unsubscribe_list WHERE email = '...';</code></li>
+<li>Re-run the curl above — that address should now be excluded (<code>Sent</code> count drops by one).</li>
+</ol>
+<p>One-off send without touching Databricks at all (useful for template/layout review):</p>
+<pre><code>python send_template_email.py</code></pre>
+</section>
+
+<section id="deploy">
+<h2>9. Creating &amp; Deploying the Azure Function</h2>
+
+<h3>9.1 Create the Function App (one-time, if not already created)</h3>
+<pre><code>az functionapp create --name &lt;app-name&gt; --resource-group devteam-projectnour-rg \
+  --storage-account claraportstorage --consumption-plan-location centralus \
+  --runtime python --runtime-version 3.10 --functions-version 4 --os-type Linux</code></pre>
+
+<h3>9.2 Assign a managed identity (for Key Vault access)</h3>
+<pre><code>PRINCIPAL_ID=$(az functionapp identity assign --name &lt;app-name&gt; \
+  --resource-group devteam-projectnour-rg --query principalId -o tsv)</code></pre>
+<p>Then grant that identity <strong>Key Vault Secrets User</strong> on the vault via the Portal (Access control (IAM) → Add role assignment) — see §13.2 for the exact steps and a common gotcha with managed identities not surfacing in the default search filter.</p>
+
+<h3>9.3 Push App Settings</h3>
+<pre><code>az functionapp config appsettings set --name &lt;app-name&gt; --resource-group devteam-projectnour-rg \
+  --settings \
+    AAD_TENANT_ID="af332e32-a9ba-4ca0-b37a-2b07a41c8f59" \
+    AAD_CLIENT_ID="d97d0f55-a968-43a0-94c6-5d433ac05874" \
+    DATABRICKS_SERVER_HOSTNAME="adb-7405605860283973.13.azuredatabricks.net" \
+    DATABRICKS_HTTP_PATH="/sql/1.0/warehouses/3fd364899555d7d7" \
+    DATABRICKS_CATALOG="claraport_ws" DATABRICKS_SCHEMA="prd_viasmiles_email" \
+    DATABRICKS_TABLE="customer" DATABRICKS_AUTH_TYPE="service_principal" \
+    DATABRICKS_CAMPAIGN_SCHEMA="viasmiles_campaigns" \
+    DATABRICKS_TEST_TABLE="customer_test" \
+    DATABRICKS_UNSUBSCRIBE_TABLE="unsubscribe_list" \
+    TEST_MODE="true" \
+    SEND_DELAY_SECONDS="2" \
+    ACS_SMTP_HOST="smtp.azurecomm.net" ACS_SMTP_PORT="587" \
+    ACS_SMTP_USERNAME="ViaSmile-Smtp" \
+    ACS_SENDER_ADDRESS="hello-exton@viasmiles.com" \
+    KEY_VAULT_URL="https://email-vault.vault.azure.net/" \
+    TIMER_SCHEDULE="0 0 8 * * *" \
+    APP_BASE_URL="https://&lt;app-name&gt;.azurewebsites.net"</code></pre>
+<div class="callout warn"><code>local.settings.json</code> is <strong>never</strong> uploaded by <code>func publish</code> — every setting must be pushed explicitly like this.</div>
+
+<h3>9.4 Ensure real storage is configured</h3>
+<pre><code>STORAGE_CONN=$(az storage account show-connection-string --name claraportstorage \
+  --resource-group devteam-projectnour-rg --query connectionString -o tsv)
+
+az functionapp config appsettings set --name &lt;app-name&gt; \
+  --resource-group devteam-projectnour-rg --settings AzureWebJobsStorage="$STORAGE_CONN"</code></pre>
+<p><code>func publish</code> fails if the target app only has the local dev placeholder (<code>UseDevelopmentStorage=true</code>).</p>
+
+<h3>9.5 Deploy</h3>
+<pre><code>func azure functionapp publish &lt;app-name&gt;</code></pre>
+<p>Expected tail of output:</p>
+<pre><code>Deployment successful. ...
+Remote build succeeded!
+Functions in &lt;app-name&gt;:
+    send_customer_emails - [httpTrigger]
+        Invoke url: https://&lt;app-name&gt;.azurewebsites.net/api/send-customer-emails
+    send_customer_emails_daily - [timerTrigger]
+    unsubscribe - [httpTrigger]
+        Invoke url: https://&lt;app-name&gt;.azurewebsites.net/api/unsubscribe</code></pre>
+<p>Keep <code>.funcignore</code> in the repo root — it excludes <code>.venv/</code>, <code>.git/</code>, caches and local secret files from the deploy package, keeping publishes fast (a bundled <code>.venv</code> can otherwise balloon the upload to 300+ MB and risks shipping Linux wheels built for the wrong Python minor version).</p>
+</section>
+
+<section id="testing">
+<h2>10. Test Cases (Cloud)</h2>
+
+<h3>10.1 Get the function key</h3>
+<pre><code>az functionapp keys list --name &lt;app-name&gt; --resource-group devteam-projectnour-rg --query functionKeys</code></pre>
+<p>(If this fails with a resource-provider registration error, fetch the key from the Portal instead: Function App → Functions → <code>send_customer_emails</code> → Function Keys.)</p>
+
+<h3>10.2 Test Case: send to the sandbox table (<code>TEST_MODE=true</code>)</h3>
+<table>
+<tr><th>Step</th><th>Action</th><th>Expected result</th></tr>
+<tr><td>1</td><td><code>curl -X POST ".../api/send-customer-emails?code=&lt;key&gt;"</code></td><td><code>Sent: 1, Failed: 0. Failed addresses: []</code></td></tr>
+<tr><td>2</td><td>Check inbox for the test address</td><td>Branded HTML email, "Hi &lt;First&gt; &lt;Last&gt;," greeting, working Book/Call CTAs, footer Unsubscribe link pointing at the real <code>APP_BASE_URL</code> (not localhost)</td></tr>
+<tr><td>3</td><td>Click "Unsubscribe" in the email</td><td>Confirm page loads, no DB write yet (GET is non-destructive)</td></tr>
+<tr><td>4</td><td>Click "Confirm unsubscribe"</td><td>Done page renders; <code>unsubscribe_list</code> gets exactly one new row</td></tr>
+<tr><td>5</td><td>Click the same link again (or resubmit the confirm form)</td><td>No duplicate row, timestamp unchanged — <code>MERGE</code> is idempotent</td></tr>
+<tr><td>6</td><td>Re-run step 1's curl</td><td><code>Sent: 0</code> — anti-join now excludes the unsubscribed address</td></tr>
+</table>
+
+<h3>10.3 Test Case: invalid/tampered unsubscribe link</h3>
+<pre><code>curl -i "https://&lt;app-name&gt;.azurewebsites.net/api/unsubscribe?email=someone@example.com&amp;token=not-a-real-token"</code></pre>
+<p>Expected: confirm page renders with an error banner ("This unsubscribe link is invalid or has expired...") instead of a working confirm form — the HMAC check in <code>unsubscribe_utils.verify_token()</code> rejects it.</p>
+
+<h3>10.4 Test Case: specific campaign selection</h3>
+<pre><code>curl -X POST ".../api/send-customer-emails?campaign=viasmiles_acquisition_v1&amp;code=&lt;key&gt;"</code></pre>
+<p>Expected: pulls from that campaign's configured table/template (ignored if <code>TEST_MODE=true</code>, which always forces the sandbox campaign — see §4).</p>
+</section>
+
+<section id="production">
+<h2>11. Running in Production</h2>
+<ol>
+<li>Confirm the service principal has grants on the production table (§3.3) and the campaign schema.</li>
+<li>Flip the safety switch off:
+<pre><code>az functionapp config appsettings set --name &lt;app-name&gt; --resource-group devteam-projectnour-rg \
+  --settings TEST_MODE="false"</code></pre></li>
+<li>Confirm <code>ACS_SENDER_ADDRESS</code> is a verified, connected MailFrom address (§13.3) — otherwise sends will bounce with <code>501 5.1.7 sender domain has not been linked</code>.</li>
+<li>Manual send (first production run, supervised):
+<pre><code>curl -X POST "https://&lt;app-name&gt;.azurewebsites.net/api/send-customer-emails?code=&lt;key&gt;"</code></pre></li>
+<li>From then on, the daily timer trigger (<code>TIMER_SCHEDULE</code>) runs this automatically — no manual trigger needed. Monitor it via Application Insights / Log Analytics (§11.1) rather than the HTTP response, since the timer trigger has no caller to return a response to.</li>
+</ol>
+
+<h3>11.1 Monitoring delivery</h3>
+<p>Communication Services resource → Diagnostic settings → send <code>EmailSendMailOperational</code> and <code>EmailStatusUpdateOperational</code> to a Log Analytics workspace, then query:</p>
+<pre><code>ACSEmailStatusUpdateOperational
+| where TimeGenerated > ago(1h)
+| project TimeGenerated, MessageId, Sender, Recipient, Status, StatusDetail
+| order by TimeGenerated desc</code></pre>
+<p><code>Status</code> resolves to <code>Delivered</code>, <code>Bounced</code>, <code>Failed</code>, <code>Suppressed</code>, or <code>Quarantined</code>.</p>
+
+<h3>11.2 Rolling back a bad send</h3>
+<p>There is no built-in "undo a batch send". If a campaign goes out with a mistake, fix the template/config, redeploy, and the next run uses the corrected version — the unsubscribe mechanism is unaffected by template changes.</p>
+</section>
+
+<section id="security">
+<h2>12. Secrets &amp; Security Notes</h2>
+<div class="callout warn">
+<strong><span class="badge warn">Interim</span> App Settings secret override is currently active.</strong>
+The intended design is: secrets live only in Key Vault, and the Function App's <strong>managed identity</strong> reads them at runtime via <code>DefaultAzureCredential</code>. As of this writing, the managed identity's Key Vault RBAC role assignment (<code>Key Vault Secrets User</code>) has not been successfully granted due to an organizational permissions gap (the account provisioning this app lacks <code>Microsoft.Authorization/roleAssignments/write</code> on the vault scope). As a stopgap, <code>config.py</code> checks for a same-named App Setting override before calling Key Vault:
+</div>
+<pre><code>def get_secret(name):
+    override = os.environ.get(name.upper().replace("-", "_"))
+    if override:
+        return override
+    return _get_client().get_secret(name).value</code></pre>
+<p>This means <code>AAD_CLIENT_SECRET_VALUE</code> and <code>UNSUBSCRIBE_SIGNING_KEY</code> currently exist in plaintext in the Function App's App Settings (encrypted at rest by Azure, but visible to anyone with Reader access to the Function App resource — a broader audience than Key Vault's RBAC would normally allow).</p>
+<p><strong>Action item:</strong> once someone with Owner / User Access Administrator on the subscription or resource group grants the managed identity (<code>principalId</code>, see <code>az functionapp identity show</code>) the <strong>Key Vault Secrets User</strong> role on <code>Email-Vault</code>, remove the two App Settings overrides:</p>
+<pre><code>az functionapp config appsettings delete --name &lt;app-name&gt; --resource-group devteam-projectnour-rg \
+  --setting-names AAD_CLIENT_SECRET_VALUE UNSUBSCRIBE_SIGNING_KEY</code></pre>
+<p>No code change is needed to revert — <code>get_secret()</code> automatically falls through to Key Vault once the overrides are gone.</p>
+
+<h3>12.1 Other notes</h3>
+<ul>
+<li>Never commit <code>local.settings.json</code> or <code>.env</code> — both are gitignored.</li>
+<li>The unsubscribe route is intentionally <code>AuthLevel.ANONYMOUS</code> (recipients have no function key) — but it only ever writes a row keyed by an HMAC-verified email; it cannot be used to unsubscribe an arbitrary address without a valid signed token for that exact address.</li>
+<li>The <code>send-customer-emails</code> route requires a function key (<code>AuthLevel.FUNCTION</code>) — don't expose that key in client-side code or public docs/screenshots.</li>
+</ul>
+</section>
+
+<section id="troubleshooting">
+<h2>13. Troubleshooting Log</h2>
+
+<table>
+<tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+<tr><td>Deployed HTTP trigger returns <code>500</code> with empty body</td><td>Unhandled exception before the function's own try/except (e.g. Key Vault auth failure in <code>get_connection()</code>/<code>get_secret()</code>)</td><td>Reproduce locally with <code>func start</code> — tracebacks print to that terminal even when they don't on Azure</td></tr>
+<tr><td><code>az functionapp log tail</code> / <code>az webapp log tail</code> → 404 on <code>/logstream</code></td><td>Log streaming isn't reliably supported on Linux Consumption plan</td><td>Reproduce locally instead (fastest path); or use Application Insights Live Metrics if App Insights is linked</td></tr>
+<tr><td><code>func azure functionapp logstream</code> → "Log stream is not currently supported in Linux Consumption and Flex Apps"</td><td>Same platform limitation</td><td>Same as above</td></tr>
+<tr><td><code>az monitor app-insights component create</code> fails with <code>AuthorizationFailed</code> on <code>microsoft.insights/register/action</code></td><td>Account lacks subscription-level resource-provider registration rights</td><td>Ask subscription Owner, or skip App Insights and debug locally</td></tr>
+<tr><td><code>az role assignment create</code> fails with <code>AuthorizationFailed</code> on <code>Microsoft.Authorization/roleAssignments/write</code></td><td>Account only has a data-plane role (e.g. <code>Key Vault Secrets Officer</code>), not <code>Owner</code>/<code>User Access Administrator</code></td><td>Needs someone with that role; see §12 for the interim App Settings workaround</td></tr>
+<tr><td>Portal IAM "Add role assignment" appears to succeed but <code>az role assignment list</code> never shows the managed identity</td><td>The default "Select members" search only searches Users/Groups/Service Principals — Function App system-assigned identities often don't surface there</td><td>In the Select Members panel, switch the object-type filter to <strong>Managed Identity</strong> and search by the Function App's name, or paste the <code>principalId</code> GUID directly</td></tr>
+<tr><td><code>smtplib.SMTPSenderRefused: 501 5.1.7 The specified sender domain has not been linked</code></td><td>The sender's domain is verified on the Email Communication Services resource, but not <strong>connected</strong> to the specific Communication Services resource used for SMTP</td><td>Communication Services resource → Email → Domains → Connect domain</td></tr>
+<tr><td><code>ConnectionRefusedError: [Errno 111]</code> on the 2nd+ send in a loop</td><td>ACS SMTP relay throttles rapid repeated connections</td><td>Add a delay between sends — <code>SEND_DELAY_SECONDS</code> (default 2s)</td></tr>
+<tr><td><code>TABLE_OR_VIEW_NOT_FOUND</code></td><td>Schema/table missing in Unity Catalog</td><td>Run the DDL in §3</td></tr>
+<tr><td>Hangs at "Listening for OAuth callback"</td><td>Wrong <code>auth_type</code> value in <code>db_utils.get_connection()</code></td><td>Must be exactly <code>"azure-sp-m2m"</code>, not <code>"azure-client-secret"</code></td></tr>
+<tr><td><code>403 Forbidden</code> on Databricks <code>OpenSession</code></td><td>Service principal not added as a workspace identity</td><td>Databricks Admin Settings → Identity and access → Service principals</td></tr>
+<tr><td><code>PERMISSION_DENIED</code>, not authorized for SQL Endpoint</td><td>Missing "Can Use" grant on the SQL warehouse</td><td>Warehouse → Permissions tab</td></tr>
+<tr><td><code>AADSTS7000215</code> invalid client secret</td><td>Vault/App Setting holds the Secret <strong>ID</strong>, not the Secret <strong>Value</strong></td><td>Regenerate the Entra app secret, copy the Value column (shown once, at creation)</td></tr>
+<tr><td>Local script fails with <code>KeyError</code> on an env var</td><td>App settings from <code>local.settings.json</code> weren't exported into the shell</td><td><code>export</code> each var manually, or run via <code>func start</code>/Core Tools which loads them automatically</td></tr>
+<tr><td>Unsubscribe link in a received email points at <code>localhost</code></td><td>The email was sent by a locally-running <code>func start</code>, which uses <code>local.settings.json</code>'s <code>APP_BASE_URL=http://localhost:7071</code></td><td>Trigger the send from the deployed Azure endpoint instead — its own <code>APP_BASE_URL</code> app setting controls this independently</td></tr>
+<tr><td>Deploy package unexpectedly huge (300+ MB)</td><td>No <code>.funcignore</code> — <code>.venv/</code>, <code>.git/</code> etc. get bundled</td><td>Add <code>.funcignore</code> (see repo root)</td></tr>
+<tr><td>Edited a value in <code>local.settings.json</code> (e.g. <code>ACS_SENDER_ADDRESS</code>) while <code>func start</code> was already running, but local sends still use the old value</td><td>The Functions host reads <code>local.settings.json</code> into <code>os.environ</code> once, at process startup, then caches it for the life of that process — editing the file on disk doesn't touch the already-running process's environment</td><td>Stop the running <code>func start</code> (Ctrl+C, or <code>kill &lt;pid&gt;</code> — find it with <code>pgrep -af "func start"</code>) and start it again so it re-reads the file</td></tr>
+<tr><td>Changed a value in <code>local.settings.json</code>, restarted <code>func start</code>, but the <strong>deployed</strong> endpoint (<code>https://&lt;app-name&gt;.azurewebsites.net/...</code>) still sends/behaves with the old value</td><td><code>local.settings.json</code> is local-only — it's listed in <code>.funcignore</code> and never uploaded by <code>func publish</code>. The deployed Function App reads its own separate Application Settings in Azure, which are untouched by any local file edit</td><td>Update the live App Setting directly: <code>az functionapp config appsettings set --name &lt;app-name&gt; --resource-group devteam-projectnour-rg --settings ACS_SENDER_ADDRESS="new@address.com"</code> (this also triggers an automatic restart, so a separate <code>az functionapp restart</code> isn't required)</td></tr>
+<tr><td>Ran <code>az functionapp restart</code> after changing a setting, but the old value is still in effect</td><td>Restarting reloads whatever App Settings are currently stored in Azure — if the actual <code>az functionapp config appsettings set</code> call was never run (only the restart), there was nothing new to reload</td><td>Confirm the setting actually changed first: <code>az functionapp config appsettings list --name &lt;app-name&gt; --resource-group devteam-projectnour-rg --query "[?name=='ACS_SENDER_ADDRESS']"</code>, then run <code>appsettings set</code> if it still shows the old value</td></tr>
+<tr><td><code>az login</code> opens a browser and fails with <code>Running as root without --no-sandbox is not supported</code></td><td>Chrome/Chromium refuses to launch as root on a headless/root shell</td><td>Use <code>az login --use-device-code</code> instead — it prints a URL and short code to enter from any browser, on any machine</td></tr>
+</table>
+</section>
+
+<section id="new-clinic">
+<h2>14. Adding a New Clinic / Campaign</h2>
+<ol>
+<li>Create its Unity Catalog table (own schema or share <code>viasmiles_campaigns</code>), e.g.:
+<pre><code>CREATE TABLE claraport_ws.viasmiles_campaigns.customer_exton (
+  fname STRING, lname STRING, email STRING
+);
+GRANT SELECT, MODIFY ON TABLE claraport_ws.viasmiles_campaigns.customer_exton
+  TO `d97d0f55-a968-43a0-94c6-5d433ac05874`;</code></pre></li>
+<li>Add a new HTML template under <code>templates/</code> with the same merge tags (<code>{{first_name}}</code>, <code>{{last_name}}</code>, <code>{{clinic_city}}</code>, <code>{{clinic_phone}}</code>, <code>{{booking_link}}</code>, <code>{{unsubscribe_link}}</code>).</li>
+<li>Add an entry to <code>CAMPAIGNS</code> in <code>campaigns.py</code> with that table, template filename, subject, and clinic-specific merge tag values.</li>
+<li>Deploy, then test with <code>?campaign=&lt;new_id&gt;</code> before relying on the daily timer (which only runs <code>DEFAULT_CAMPAIGN</code> unless you add additional timer triggers or a multi-campaign loop in <code>function_app.py</code>).</li>
+</ol>
+<p>The shared <code>unsubscribe_list</code> table means an opt-out from any clinic's email automatically excludes that address from every other campaign's sends too — there is currently no per-clinic-only opt-out; add a <code>WHERE campaign = ...</code> filter to the anti-join in <code>db_utils.fetch_customers()</code> if per-campaign-only opt-outs are ever needed.</p>
+</section>
+
+</div>
+
+<footer>ViaSmiles EmailApp · Azure Functions (Python) · Databricks Unity Catalog · Azure Communication Services</footer>
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+Run started:2026-10-17 05:50:22.714885+00:00
+
+Test results:
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Medium
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html
+   Location: /var/www/html/EmailApp/db_utils.py:58:16
+57	            cursor.execute(
+58	                "WITH deduped AS ("
+59	                f"  SELECT c.fname, COALESCE(c.lname, '') AS lname, c.email, "
+60	                "    ROW_NUMBER() OVER (PARTITION BY lower(c.email) ORDER BY c.fname) AS rn "
+61	                f"  FROM {table} c "
+62	                f"  LEFT ANTI JOIN {unsub_table} u ON lower(c.email) = lower(u.email)"
+63	                ") "
+64	                "SELECT fname, lname, email FROM deduped WHERE rn = 1"
+65	            )
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 339
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 0
+		Medium: 1
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 1
+		High: 0
+Files skipped (0):

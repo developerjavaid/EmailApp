@@ -1,0 +1,739 @@
+<title>ViaSmiles Email Runbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --paper: #F4F6F9;
+    --surface: #FFFFFF;
+    --surface-2: #ECEFF4;
+    --ink: #121826;
+    --body-text: #232B3A;
+    --muted: #5B6472;
+    --line: #D7DCE5;
+    --accent: #C97A2E;
+    --accent-ink: #7A4A19;
+    --accent-tint: #F5E6D3;
+    --success: #2F9E7D;
+    --success-tint: #DFF2EC;
+    --danger: #C2483B;
+    --danger-tint: #FAE4E1;
+    --focus: #2E6EE0;
+
+    --code-bg: #10151F;
+    --code-line: #232B3D;
+    --code-text: #E4E8F1;
+    --code-muted: #6E7A93;
+    --code-accent: #E0A464;
+    --code-string: #8FD0A9;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-condensed: "IBM Plex Sans Condensed", "IBM Plex Sans", Arial, sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper: #0D1119;
+      --surface: #161C29;
+      --surface-2: #1D2434;
+      --ink: #EEF1F6;
+      --body-text: #D3D9E5;
+      --muted: #8B94A7;
+      --line: #2A3346;
+      --accent: #E0A464;
+      --accent-ink: #F3D6AE;
+      --accent-tint: #2E2416;
+      --success: #4CBE9A;
+      --success-tint: #163229;
+      --danger: #E27A6C;
+      --danger-tint: #2E1917;
+      --focus: #6B9DFF;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper: #0D1119;
+    --surface: #161C29;
+    --surface-2: #1D2434;
+    --ink: #EEF1F6;
+    --body-text: #D3D9E5;
+    --muted: #8B94A7;
+    --line: #2A3346;
+    --accent: #E0A464;
+    --accent-ink: #F3D6AE;
+    --accent-tint: #2E2416;
+    --success: #4CBE9A;
+    --success-tint: #163229;
+    --danger: #E27A6C;
+    --danger-tint: #2E1917;
+    --focus: #6B9DFF;
+    color-scheme: dark;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *,*::before,*::after{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  body{
+    margin: 0;
+    background: var(--paper);
+    color: var(--body-text);
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,h2,h3,h4{
+    font-family: var(--font-display);
+    color: var(--ink);
+    font-weight: 700;
+    text-wrap: balance;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  a{ color: var(--accent-ink); text-decoration-color: var(--accent); text-underline-offset: 3px; }
+  a:hover{ color: var(--accent); }
+  :focus-visible{ outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 3px; }
+
+  .eyebrow{
+    font-family: var(--font-condensed);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+  }
+
+  code, .mono{ font-family: var(--font-mono); }
+
+  /* ---------- Header band ---------- */
+  .masthead{
+    width: 100%;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .masthead-inner{
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 3rem clamp(1.25rem, 4vw, 3.5rem) 2.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+  .masthead h1{
+    font-size: clamp(2rem, 1.5rem + 1.8vw, 2.9rem);
+    letter-spacing: -0.01em;
+  }
+  .masthead .lede{
+    max-width: 62ch;
+    color: var(--muted);
+    font-size: 1.1rem;
+  }
+  .meta-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 0.4rem;
+  }
+  .pill{
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 100px;
+    font-family: var(--font-condensed);
+    font-weight: 600;
+    font-size: 0.8rem;
+    background: var(--surface-2);
+    color: var(--muted);
+    border: 1px solid var(--line);
+  }
+  .pill.status-ok{ background: var(--success-tint); color: var(--success); border-color: transparent; }
+  .pill.status-progress{ background: var(--accent-tint); color: var(--accent-ink); border-color: transparent; }
+  .pill .dot{ width: 0.45rem; height: 0.45rem; border-radius: 50%; background: currentColor; flex: none; }
+
+  /* ---------- Architecture diagram ---------- */
+  .diagram-wrap{
+    margin-top: 1.75rem;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.5rem clamp(1rem, 3vw, 2.25rem);
+    overflow-x: auto;
+  }
+  .diagram-wrap svg{ display:block; min-width: 760px; width: 100%; height: auto; }
+  .diagram-wrap text{ font-family: var(--font-display); }
+  .diagram-wrap .mono-label{ font-family: var(--font-mono); }
+
+  /* ---------- Page shell: nav / content / rail ---------- */
+  .shell{
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 clamp(1.25rem, 4vw, 3.5rem);
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr) 280px;
+    gap: clamp(1.5rem, 3vw, 3rem);
+    align-items: start;
+  }
+
+  .stage-nav{
+    position: sticky;
+    top: 1.5rem;
+    padding: 1.5rem 0 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  .stage-nav .nav-title{
+    font-family: var(--font-condensed);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+  .stage-nav a{
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 8px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-left: 2px solid transparent;
+  }
+  .stage-nav a .num{
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    flex: none;
+    width: 1.4rem;
+  }
+  .stage-nav a:hover{ background: var(--surface-2); color: var(--ink); }
+  .stage-nav a.active{ background: var(--accent-tint); color: var(--accent-ink); border-left-color: var(--accent); font-weight: 600; }
+  .stage-nav a.active .num{ color: var(--accent-ink); }
+  .stage-nav .ref-link{ margin-top: 0.75rem; padding-top: 0.9rem; border-top: 1px solid var(--line); }
+
+  main{ min-width: 0; padding: 2.5rem 0 5rem; }
+
+  section{ padding: 2.75rem 0; border-bottom: 1px solid var(--line); scroll-margin-top: 1.5rem; }
+  section:first-of-type{ padding-top: 0.5rem; }
+  section:last-of-type{ border-bottom: none; }
+
+  .stage-head{ display: flex; gap: 1rem; align-items: baseline; margin-bottom: 1.1rem; }
+  .stage-head .stage-num{
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    color: var(--accent);
+    font-weight: 600;
+    flex: none;
+  }
+  section h2{ font-size: clamp(1.4rem, 1.2rem + 0.7vw, 1.85rem); }
+  section h3{ font-size: 1.15rem; margin-top: 1.6rem; margin-bottom: 0.6rem; }
+
+  .prose{ max-width: 72ch; }
+  .prose p{ margin: 0 0 1rem; }
+  .prose ul, .prose ol{ max-width: 72ch; padding-left: 1.3rem; margin: 0 0 1rem; }
+  .prose li{ margin-bottom: 0.4rem; }
+  .prose strong{ color: var(--ink); }
+
+  .callout{
+    display: flex;
+    gap: 0.85rem;
+    padding: 1rem 1.15rem;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    margin: 1.25rem 0;
+    max-width: 78ch;
+  }
+  .callout .icon{ flex: none; font-size: 1.05rem; line-height: 1.5; }
+  .callout p{ margin: 0; }
+  .callout.warn{ background: var(--danger-tint); border-color: transparent; }
+  .callout.warn .label{ color: var(--danger); }
+  .callout.tip{ background: var(--accent-tint); border-color: transparent; }
+  .callout.tip .label{ color: var(--accent-ink); }
+  .callout .label{ font-family: var(--font-condensed); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; display:block; margin-bottom: 0.25rem; }
+
+  /* ---------- Code blocks: fixed dark console, both themes ---------- */
+  .code-block{
+    background: var(--code-bg);
+    border-radius: 10px;
+    margin: 1rem 0 1.4rem;
+    overflow: hidden;
+    border: 1px solid var(--code-line);
+    max-width: 100%;
+  }
+  .code-block .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.9rem;
+    border-bottom: 1px solid var(--code-line);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--code-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .code-block .copy-btn{
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    background: transparent;
+    border: 1px solid var(--code-line);
+    color: var(--code-muted);
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .code-block .copy-btn:hover{ color: var(--code-text); border-color: var(--code-muted); }
+  .code-block pre{
+    margin: 0;
+    padding: 1rem 1.15rem 1.2rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--code-text);
+  }
+  .code-block .c-muted{ color: var(--code-muted); }
+  .code-block .c-accent{ color: var(--code-accent); }
+  .code-block .c-string{ color: var(--code-string); }
+
+  /* ---------- Tables ---------- */
+  .table-wrap{ overflow-x: auto; margin: 1.2rem 0 1.6rem; border: 1px solid var(--line); border-radius: 10px; }
+  table{ border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.92rem; background: var(--surface); }
+  th, td{ text-align: left; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th{
+    font-family: var(--font-condensed);
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface-2);
+  }
+  tbody tr:last-child td{ border-bottom: none; }
+  td.mono, th.mono{ font-family: var(--font-mono); font-size: 0.85rem; }
+  .num-cell{ font-variant-numeric: tabular-nums; }
+
+  /* ---------- Right rail ---------- */
+  .rail{ position: sticky; top: 1.5rem; padding: 2.5rem 0 3rem; display: flex; flex-direction: column; gap: 1.25rem; }
+  .rail-card{ background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 1.1rem 1.2rem; }
+  .rail-card h4{ font-family: var(--font-condensed); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; }
+  .rail-list{ list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.65rem; }
+  .rail-list li{ display: flex; flex-direction: column; gap: 0.1rem; }
+  .rail-list .k{ font-family: var(--font-condensed); font-size: 0.72rem; color: var(--muted); }
+  .rail-list .v{ font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink); word-break: break-word; }
+  .status-list{ list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+  .status-list li{ display: flex; align-items: flex-start; gap: 0.55rem; font-size: 0.85rem; }
+  .status-list .chip{ flex:none; width: 1.1rem; height: 1.1rem; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 0.65rem; margin-top: 0.1rem; }
+  .status-list .chip.ok{ background: var(--success-tint); color: var(--success); }
+  .status-list .chip.mid{ background: var(--accent-tint); color: var(--accent-ink); }
+
+  footer{
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 2rem clamp(1.25rem, 4vw, 3.5rem) 3rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--line);
+  }
+
+  @media (max-width: 1100px){
+    .shell{ grid-template-columns: minmax(0,1fr); }
+    .stage-nav{ position: static; padding: 1rem 0; }
+    .stage-nav .nav-inner{ display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.5rem; }
+    .stage-nav a{ white-space: nowrap; border-left: none; border-bottom: 2px solid transparent; }
+    .stage-nav a.active{ border-left: none; border-bottom-color: var(--accent); }
+    .rail{ position: static; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); }
+  }
+</style>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <span class="eyebrow">Azure Functions · Runbook</span>
+    <h1>ViaSmiles Email Runbook</h1>
+    <p class="lede">End-to-end setup, debugging, and deployment record for the customer-email Azure Function: pulling recipients from Databricks and sending through Azure Communication Services, secured entirely through Microsoft Entra ID and Key Vault.</p>
+    <div class="meta-row">
+      <span class="pill status-ok"><span class="dot"></span>Local send verified</span>
+      <span class="pill status-progress"><span class="dot"></span>Azure deploy in progress</span>
+      <span class="pill">Python 3.10</span>
+      <span class="pill">Azure Functions v4</span>
+      <span class="pill">Databricks SQL</span>
+      <span class="pill">Communication Services</span>
+    </div>
+
+    <div class="diagram-wrap" role="img" aria-label="Architecture: Databricks customer table feeds the send_customer_emails Function, which reads its secret from Key Vault and sends mail through Azure Communication Services SMTP to each recipient.">
+      <svg viewBox="0 0 1180 250" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"></path>
+          </marker>
+        </defs>
+
+        <!-- Databricks -->
+        <rect x="20" y="70" width="200" height="90" rx="10" fill="var(--surface)" stroke="var(--line)"></rect>
+        <text x="120" y="100" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">Databricks SQL</text>
+        <text x="120" y="120" text-anchor="middle" font-size="11.5" fill="var(--muted)">Warehouse (service principal)</text>
+        <text x="120" y="140" text-anchor="middle" class="mono-label" font-size="11" fill="var(--accent-ink)">claraport_ws.customer</text>
+
+        <!-- Function App -->
+        <rect x="480" y="40" width="220" height="150" rx="10" fill="var(--accent-tint)" stroke="var(--accent)"></rect>
+        <text x="590" y="70" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)">send_customer_emails</text>
+        <text x="590" y="90" text-anchor="middle" font-size="11.5" fill="var(--muted)">Azure Function · Python</text>
+        <text x="590" y="112" text-anchor="middle" class="mono-label" font-size="11" fill="var(--accent-ink)">GET/POST /api/send-customer-emails</text>
+        <text x="590" y="150" text-anchor="middle" font-size="11" fill="var(--muted)">1. fetch_customers()</text>
+        <text x="590" y="168" text-anchor="middle" font-size="11" fill="var(--muted)">2. send_email() per row</text>
+
+        <!-- ACS -->
+        <rect x="940" y="70" width="220" height="90" rx="10" fill="var(--surface)" stroke="var(--line)"></rect>
+        <text x="1050" y="100" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">Communication Services</text>
+        <text x="1050" y="120" text-anchor="middle" font-size="11.5" fill="var(--muted)">SMTP AUTH · Entra ID</text>
+        <text x="1050" y="140" text-anchor="middle" class="mono-label" font-size="11" fill="var(--accent-ink)">smtp.azurecomm.net:587</text>
+
+        <!-- Key Vault (top center) -->
+        <rect x="480" y="200" width="220" height="46" rx="10" fill="var(--surface)" stroke="var(--line)"></rect>
+        <text x="590" y="228" text-anchor="middle" font-size="12.5" font-weight="600" fill="var(--ink)">Key Vault · aad-client-secret-value</text>
+
+        <!-- arrows -->
+        <line x1="220" y1="115" x2="475" y2="115" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow)"></line>
+        <line x1="700" y1="115" x2="935" y2="115" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow)"></line>
+        <line x1="590" y1="200" x2="590" y2="192" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#arrow)"></line>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav class="stage-nav" aria-label="Runbook stages">
+    <div class="nav-inner" id="navInner">
+      <span class="nav-title">Stages</span>
+      <a href="#prereqs"><span class="num">01</span>Prerequisites</a>
+      <a href="#vault"><span class="num">02</span>Key Vault &amp; Secrets</a>
+      <a href="#local-env"><span class="num">03</span>Local Environment</a>
+      <a href="#databricks"><span class="num">04</span>Databricks Access</a>
+      <a href="#auth-fix"><span class="num">05</span>Service Principal Auth</a>
+      <a href="#acs-email"><span class="num">06</span>ACS Email Delivery</a>
+      <a href="#testing"><span class="num">07</span>Local Testing</a>
+      <a href="#deploy"><span class="num">08</span>Deploy to Azure</a>
+      <a href="#monitor"><span class="num">09</span>Monitor &amp; Verify</a>
+      <a class="ref-link" href="#troubleshooting">Troubleshooting Log</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <section id="prereqs">
+      <div class="stage-head"><span class="stage-num">01</span><h2>Prerequisites</h2></div>
+      <div class="prose">
+        <p>Everything in this runbook assumes a Linux host (this project was run on Ubuntu 22.04) with the following already reachable:</p>
+        <ul>
+          <li>An Azure subscription with rights to create resources in resource group <code class="mono">devteam-projectnour-rg</code>.</li>
+          <li>A Databricks workspace on Azure (<code class="mono">adb-7405605860283973.13.azuredatabricks.net</code>) with Unity Catalog enabled.</li>
+          <li>A Microsoft Entra app registration used as the shared service principal for both Databricks and email — client ID <code class="mono">d97d0f55-a968-43a0-94c6-5d433ac05874</code>, tenant <code class="mono">af332e32-a9ba-4ca0-b37a-2b07a41c8f59</code>.</li>
+          <li>Python 3.10, Node.js/npm (for tooling, not runtime), and root/sudo access for package installs.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="vault">
+      <div class="stage-head"><span class="stage-num">02</span><h2>Key Vault &amp; Secrets</h2></div>
+      <div class="prose">
+        <p>One secret carries the entire app: the Entra application's client secret, read by both the Databricks connection and the email send path. It lives in Key Vault as <code class="mono">aad-client-secret-value</code>, fetched through <code class="mono">config.py</code>'s <code class="mono">get_secret()</code> via <code class="mono">DefaultAzureCredential</code> — your CLI login locally, the Function App's managed identity in Azure.</p>
+      </div>
+      <div class="callout warn">
+        <span class="icon">⚠️</span>
+        <div><span class="label">Gotcha</span><p>Entra ID shows two columns when you create a client secret: <strong>Secret ID</strong> (a GUID, just an identifier) and <strong>Value</strong> (the actual credential). Copying the ID instead of the Value produces a vault secret that looks valid but fails token requests with <code class="mono">AADSTS7000215</code>. The Value is shown once, at creation — it cannot be retrieved afterward.</p></div>
+      </div>
+      <div class="code-block">
+        <div class="code-bar"><span>bash</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><span class="c-muted"># provision the vault, store the secret, wire up both identities</span>
+az keyvault create --name email-vault --resource-group devteam-projectnour-rg \
+  --location centralus --enable-rbac-authorization true
+
+az keyvault secret set --vault-name email-vault \
+  --name aad-client-secret-value --value <span class="c-string">"&lt;paste the Secret VALUE, not the Secret ID&gt;"</span>
+
+<span class="c-muted"># your own login, for local dev</span>
+az role assignment create --role <span class="c-string">"Key Vault Secrets User"</span> \
+  --assignee jvm@analyticsintellect.com --scope $(az keyvault show --name email-vault --query id -o tsv)
+
+<span class="c-muted"># the Function App's managed identity, for the deployed app</span>
+PRINCIPAL_ID=$(az functionapp identity assign --name ViaSmiles-EmailApp \
+  --resource-group devteam-projectnour-rg --query principalId -o tsv)
+az role assignment create --role <span class="c-string">"Key Vault Secrets User"</span> \
+  --assignee $PRINCIPAL_ID --scope $(az keyvault show --name email-vault --query id -o tsv)</pre>
+      </div>
+    </section>
+
+    <section id="local-env">
+      <div class="stage-head"><span class="stage-num">03</span><h2>Local Environment</h2></div>
+      <div class="prose">
+        <p>Standard Python Functions setup, plus two tooling installs that don't behave the way their default instructions suggest on a headless Linux box running as root.</p>
+        <h3>Python dependencies</h3>
+      </div>
+      <div class="code-block">
+        <div class="code-bar"><span>bash</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>python3 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt</pre>
+      </div>
+      <div class="prose"><h3>Sign in without a browser</h3><p>A headless root shell can't launch a sandboxed Chromium for the normal <code class="mono">az login</code> flow. Use the device-code flow instead — it authenticates from any browser, anywhere:</p></div>
+      <div class="code-block">
+        <div class="code-bar"><span>bash</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>az login --use-device-code</pre>
+      </div>
+      <div class="prose"><h3>Install Azure Functions Core Tools via apt, not npm</h3><p>The npm package's install script pulls a newer <code class="mono">https-proxy-agent</code> that ships ESM-only — Node 18's CommonJS installer can't <code class="mono">require()</code> it, and the install fails with <code class="mono">ERR_REQUIRE_ESM</code>. Microsoft's apt package sidesteps it entirely:</p></div>
+      <div class="code-block">
+        <div class="code-bar"><span>bash</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>curl -sSL https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -o packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb &amp;&amp; rm packages-microsoft-prod.deb
+sudo apt-get update &amp;&amp; sudo apt-get install azure-functions-core-tools-4</pre>
+      </div>
+    </section>
+
+    <section id="databricks">
+      <div class="stage-head"><span class="stage-num">04</span><h2>Databricks Access</h2></div>
+      <div class="prose">
+        <p>The service principal needs four separate, independent grants before a single row is readable. Missing any one of them fails at a different layer, which is what makes this stage worth doing in order.</p>
+        <h3>1 — Create the schema and table</h3>
+      </div>
+      <div class="code-block">
+        <div class="code-bar"><span>sql</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>CREATE SCHEMA IF NOT EXISTS claraport_ws.prd_viasmiles_email;
+
+CREATE TABLE IF NOT EXISTS claraport_ws.prd_viasmiles_email.customer (
+  fname STRING,
+  email STRING
+);</pre>
+      </div>
+      <div class="prose"><h3>2 — Add the service principal to the workspace</h3><p>Workspace → user menu → <strong>Admin Settings</strong> → <strong>Identity and access</strong> → <strong>Service principals</strong> → add client ID <code class="mono">d97d0f55-a968-43a0-94c6-5d433ac05874</code>. On a Unity-Catalog / account-managed workspace, this may need to happen in the separate Account Console first, then get assigned to the workspace.</p>
+      <h3>3 — Grant "Can Use" on the SQL Warehouse</h3>
+      <p>This is compute access, and it's entirely separate from data access — SQL Warehouses → the warehouse behind <code class="mono">/sql/1.0/warehouses/3fd364899555d7d7</code> → Permissions tab → add the service principal → <strong>Can Use</strong>.</p>
+      <h3>4 — Grant Unity Catalog data access</h3></div>
+      <div class="code-block">
+        <div class="code-bar"><span>sql</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>GRANT USE CATALOG ON CATALOG claraport_ws TO `d97d0f55-a968-43a0-94c6-5d433ac05874`;
+GRANT USE SCHEMA ON SCHEMA claraport_ws.prd_viasmiles_email TO `d97d0f55-a968-43a0-94c6-5d433ac05874`;
+GRANT SELECT, MODIFY ON TABLE claraport_ws.prd_viasmiles_email.customer TO `d97d0f55-a968-43a0-94c6-5d433ac05874`;</pre>
+      </div>
+      <div class="prose"><h3>Seed a test row</h3></div>
+      <div class="code-block">
+        <div class="code-bar"><span>sql</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>INSERT INTO claraport_ws.prd_viasmiles_email.customer (fname, email) VALUES
+  (<span class="c-string">'javaid'</span>, <span class="c-string">'developer.javaid@gmail.com'</span>),
+  (<span class="c-string">'javaid'</span>, <span class="c-string">'jvm@analyticsintellect.com'</span>),
+  (<span class="c-string">'javaid'</span>, <span class="c-string">'developer.javaid4@gmail.com'</span>);</pre>
+      </div>
+    </section>
+
+    <section id="auth-fix">
+      <div class="stage-head"><span class="stage-num">05</span><h2>Service Principal Auth</h2></div>
+      <div class="prose">
+        <p>The connector library defines a fixed set of <code class="mono">auth_type</code> values internally. Anything outside that set fails silently — no validation error, it just falls through to the connector's <em>default</em> flow, which happens to be interactive browser OAuth.</p>
+      </div>
+      <div class="callout warn">
+        <span class="icon">⚠️</span>
+        <div><span class="label">Gotcha</span><p>A plausible-looking value like <code class="mono">"azure-client-secret"</code> isn't recognized by <code class="mono">databricks-sql-connector</code> v4.4.0 — the correct enum value is <code class="mono">"azure-sp-m2m"</code>. Get it wrong and the function doesn't error, it <strong>hangs indefinitely</strong> waiting for a browser callback at <code class="mono">localhost:8020</code> that a headless server will never receive.</p></div>
+      </div>
+      <div class="code-block">
+        <div class="code-bar"><span>db_utils.py</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre><span class="c-muted"># before — silently wrong, falls back to interactive OAuth</span>
+auth_type=<span class="c-string">"azure-client-secret"</span>,
+
+<span class="c-muted"># after — matches AuthType.AZURE_SP_M2M in the installed connector</span>
+auth_type=<span class="c-string">"azure-sp-m2m"</span>,</pre>
+      </div>
+    </section>
+
+    <section id="acs-email">
+      <div class="stage-head"><span class="stage-num">06</span><h2>ACS Email Delivery</h2></div>
+      <div class="prose">
+        <p>This stage took the most iterations, because SMTP AUTH for Azure Communication Services doesn't work the way OAuth SMTP normally does elsewhere. Three independent things have to be correct simultaneously, and a <code class="mono">535 5.7.3 Authentication unsuccessful</code> response looks identical regardless of which one is wrong.</p>
+        <h3>The role: Communication and Email Service Owner</h3>
+        <p>Not Contributor — Microsoft's own docs specify a dedicated built-in role for this feature. Communication Services resource → <strong>Access control (IAM)</strong> → assign <strong>Communication and Email Service Owner</strong> to the service principal.</p>
+        <h3>The SMTP username: its own linked resource</h3>
+        <p>Distinct from the MailFrom address, and created under the Communication Services resource's own <strong>SMTP Usernames</strong> blade — linked explicitly to the Entra application. In this project it's <code class="mono">ViaSmile-Smtp</code>.</p>
+        <h3>The password: the raw client secret — not an OAuth token</h3>
+      </div>
+      <div class="callout warn">
+        <span class="icon">⚠️</span>
+        <div><span class="label">Root cause</span><p>The original code acquired an MSAL access token (<code class="mono">scope=https://communication.azure.com/.default</code>) and sent <em>that</em> as the SMTP password. Per Microsoft's documented protocol, ACS does the Entra token exchange on its own backend, using the app linked to the SMTP username — the client is only ever expected to send the <strong>client secret itself</strong>. Every fix to role, username, or sender address failed to resolve the 535 until this was corrected.</p></div>
+      </div>
+      <div class="code-block">
+        <div class="code-bar"><span>email_utils.py — before</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>app = msal.ConfidentialClientApplication(client_id, client_secret, authority)
+result = app.acquire_token_for_client(scopes=[<span class="c-string">"https://communication.azure.com/.default"</span>])
+server.login(smtp_username, result[<span class="c-string">"access_token"</span>])  <span class="c-muted"># wrong — 535 every time</span></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-bar"><span>email_utils.py — after</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>client_secret = get_secret(<span class="c-string">"aad-client-secret-value"</span>)
+server.login(smtp_username, client_secret)  <span class="c-muted"># correct — ACS exchanges it server-side</span></pre>
+      </div>
+      <div class="prose"><p>With the MSAL flow gone, <code class="mono">msal</code> also came out of <code class="mono">requirements.txt</code> — it's no longer used anywhere in the app.</p></div>
+    </section>
+
+    <section id="testing">
+      <div class="stage-head"><span class="stage-num">07</span><h2>Local Testing</h2></div>
+      <div class="prose"><p>The function ignores its own <code class="mono">AuthLevel.FUNCTION</code> setting when run through Core Tools locally — no function key needed until it's deployed.</p></div>
+      <div class="code-block">
+        <div class="code-bar"><span>bash</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>func start
+<span class="c-muted"># in a second terminal</span>
+curl -X POST <span class="c-string">"http://localhost:7071/api/send-customer-emails"</span></pre>
+      </div>
+      <div class="prose"><p>Expect a plaintext summary: <code class="mono">Sent: 3, Failed: 0. Failed addresses: []</code>. Watch the <code class="mono">func start</code> terminal in parallel — failures are logged there with a full traceback, never raised back through the HTTP response.</p></div>
+    </section>
+
+    <section id="deploy">
+      <div class="stage-head"><span class="stage-num">08</span><h2>Deploy to Azure</h2></div>
+      <div class="prose">
+        <p><code class="mono">local.settings.json</code> is gitignored and never uploaded by <code class="mono">func publish</code> — every value in it has to be pushed to the Function App separately.</p>
+      </div>
+      <div class="code-block">
+        <div class="code-bar"><span>bash</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>az functionapp config appsettings set \
+  --name ViaSmiles-EmailApp --resource-group devteam-projectnour-rg \
+  --settings \
+    AAD_TENANT_ID=<span class="c-string">"af332e32-a9ba-4ca0-b37a-2b07a41c8f59"</span> \
+    AAD_CLIENT_ID=<span class="c-string">"d97d0f55-a968-43a0-94c6-5d433ac05874"</span> \
+    DATABRICKS_SERVER_HOSTNAME=<span class="c-string">"adb-7405605860283973.13.azuredatabricks.net"</span> \
+    DATABRICKS_HTTP_PATH=<span class="c-string">"/sql/1.0/warehouses/3fd364899555d7d7"</span> \
+    DATABRICKS_CATALOG=<span class="c-string">"claraport_ws"</span> DATABRICKS_SCHEMA=<span class="c-string">"prd_viasmiles_email"</span> \
+    DATABRICKS_TABLE=<span class="c-string">"customer"</span> DATABRICKS_AUTH_TYPE=<span class="c-string">"service_principal"</span> \
+    ACS_SMTP_HOST=<span class="c-string">"smtp.azurecomm.net"</span> ACS_SMTP_PORT=<span class="c-string">"587"</span> \
+    ACS_SMTP_USERNAME=<span class="c-string">"ViaSmile-Smtp"</span> \
+    ACS_SENDER_ADDRESS=<span class="c-string">"DoNotReply@fd88cc4b-c805-4515-919a-74382085ed51.azurecomm.net"</span></pre>
+      </div>
+      <div class="callout warn">
+        <span class="icon">⚠️</span>
+        <div><span class="label">Gotcha</span><p><code class="mono">func azure functionapp publish</code> refuses to run if the target app has no <code class="mono">AzureWebJobsStorage</code> setting — it needs a real storage account connection string, not the <code class="mono">UseDevelopmentStorage=true</code> emulator value used locally.</p></div>
+      </div>
+      <div class="code-block">
+        <div class="code-bar"><span>bash</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>STORAGE_CONN=$(az storage account show-connection-string --name claraportstorage \
+  --resource-group devteam-projectnour-rg --query connectionString -o tsv)
+
+az functionapp config appsettings set --name ViaSmiles-EmailApp \
+  --resource-group devteam-projectnour-rg --settings AzureWebJobsStorage=<span class="c-string">"$STORAGE_CONN"</span>
+
+func azure functionapp publish ViaSmiles-EmailApp</pre>
+      </div>
+      <div class="prose"><h3>Viewing the deployed source</h3><p>The Portal's SSH console is unreliable on a Consumption plan — if keystrokes don't register, skip straight to the Kudu file browser instead: <code class="mono">https://viasmiles-emailapp.scm.azurewebsites.net</code> → file tree → <code class="mono">site/wwwroot</code>. Click any file to view it, no terminal required.</p></div>
+    </section>
+
+    <section id="monitor">
+      <div class="stage-head"><span class="stage-num">09</span><h2>Monitor &amp; Verify</h2></div>
+      <div class="prose"><p>Metrics on the Communication Services resource give aggregate counts only. Per-recipient delivery outcome — sent, bounced, suppressed — needs Diagnostic settings pointed at a Log Analytics workspace.</p>
+      <h3>Wire it up</h3>
+      <p>Communication Services resource → <strong>Diagnostic settings</strong> → add a setting sending <code class="mono">EmailSendMailOperational</code> and <code class="mono">EmailStatusUpdateOperational</code> to a Log Analytics workspace.</p>
+      <h3>Query delivery status</h3></div>
+      <div class="code-block">
+        <div class="code-bar"><span>kql</span><button class="copy-btn" type="button">Copy</button></div>
+        <pre>ACSEmailStatusUpdateOperational
+| where TimeGenerated &gt; ago(1h)
+| project TimeGenerated, MessageId, Sender, Recipient, Status, StatusDetail
+| order by TimeGenerated desc</pre>
+      </div>
+      <div class="prose"><p><code class="mono">Status</code> resolves to <code class="mono">Delivered</code>, <code class="mono">Bounced</code>, <code class="mono">Failed</code>, <code class="mono">Suppressed</code>, or <code class="mono">Quarantined</code> per message. At this app's current send volume, ingestion stays far under the 5&nbsp;GB/day free allowance — cost is effectively nil unless volume grows into the thousands-per-day range.</p></div>
+    </section>
+
+    <section id="troubleshooting">
+      <div class="stage-head"><h2>Troubleshooting Log</h2></div>
+      <div class="prose"><p>Every failure encountered while bringing this function up, in the order it happened. Kept as reference for the next incident that looks similar.</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="width:6%">#</th><th style="width:30%">Symptom</th><th style="width:32%">Root cause</th><th style="width:32%">Fix</th></tr></thead>
+          <tbody>
+            <tr><td class="num-cell">1</td><td>Chromium sandbox crash on <code class="mono">az login</code></td><td>Browser can't launch as root on a headless server</td><td><code class="mono">az login --use-device-code</code></td></tr>
+            <tr><td class="num-cell">2</td><td><code class="mono">func: command not found</code></td><td>Core Tools never installed</td><td>Install via apt, not npm</td></tr>
+            <tr><td class="num-cell">3</td><td><code class="mono">ERR_REQUIRE_ESM</code> during npm install</td><td>Newer <code class="mono">https-proxy-agent</code> is ESM-only; Node 18 installer uses CommonJS</td><td>Use Microsoft's apt package instead</td></tr>
+            <tr><td class="num-cell">4</td><td><code class="mono">TABLE_OR_VIEW_NOT_FOUND</code></td><td>Schema/table never created in Unity Catalog</td><td><code class="mono">CREATE SCHEMA</code> / <code class="mono">CREATE TABLE</code>, then grant access</td></tr>
+            <tr><td class="num-cell">5</td><td>Function hangs at "Listening for OAuth callback"</td><td><code class="mono">auth_type="azure-client-secret"</code> not recognized; connector falls back to interactive browser OAuth</td><td>Use <code class="mono">auth_type="azure-sp-m2m"</code></td></tr>
+            <tr><td class="num-cell">6</td><td><code class="mono">403 Forbidden</code> on Databricks <code class="mono">OpenSession</code></td><td>Service principal not added as a workspace identity</td><td>Add it under Admin Settings → Identity and access</td></tr>
+            <tr><td class="num-cell">7</td><td><code class="mono">PERMISSION_DENIED</code>, not authorized to use SQL Endpoint</td><td>Missing "Can Use" grant on the warehouse — separate from table grants</td><td>Grant "Can Use" on the warehouse's Permissions tab</td></tr>
+            <tr><td class="num-cell">8</td><td><code class="mono">535 5.7.3</code> Authentication unsuccessful</td><td><code class="mono">ACS_SENDER_ADDRESS</code> pointed to an unrelated mailbox, not a verified ACS sender</td><td>Use the actual MailFrom address</td></tr>
+            <tr><td class="num-cell">9</td><td><code class="mono">AADSTS7000215</code> invalid client secret</td><td>Vault held the Secret ID (a GUID), not the Secret Value</td><td>Regenerate the secret, copy the Value column</td></tr>
+            <tr><td class="num-cell">10</td><td><code class="mono">535 5.7.3</code> persists after sender fix</td><td>SMTP password was an MSAL OAuth token; ACS expects the raw client secret</td><td>Remove the MSAL flow, pass the client secret directly</td></tr>
+            <tr><td class="num-cell">11</td><td>Same 535, role side</td><td>Contributor isn't sufficient for SMTP AUTH</td><td>Assign "Communication and Email Service Owner"</td></tr>
+            <tr><td class="num-cell">12</td><td><code class="mono">func publish</code>: missing host storage configuration</td><td>Deployed app had no <code class="mono">AzureWebJobsStorage</code> linked to a real storage account</td><td>Set it from the existing <code class="mono">claraportstorage</code> account's connection string</td></tr>
+            <tr><td class="num-cell">13</td><td>Portal SSH console won't accept input</td><td>SSH is unreliable on Consumption-plan Linux Function Apps</td><td>Use the Kudu VFS file browser instead</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <aside class="rail">
+    <div class="rail-card">
+      <h4>At a Glance</h4>
+      <ul class="rail-list">
+        <li><span class="k">Function App</span><span class="v">ViaSmiles-EmailApp</span></li>
+        <li><span class="k">Resource Group</span><span class="v">devteam-projectnour-rg</span></li>
+        <li><span class="k">Key Vault</span><span class="v">email-vault</span></li>
+        <li><span class="k">Storage Account</span><span class="v">claraportstorage</span></li>
+        <li><span class="k">Databricks Warehouse</span><span class="v">3fd364899555d7d7</span></li>
+        <li><span class="k">Table</span><span class="v">claraport_ws.prd_viasmiles_email.customer</span></li>
+        <li><span class="k">SMTP Username</span><span class="v">ViaSmile-Smtp</span></li>
+      </ul>
+    </div>
+    <div class="rail-card">
+      <h4>Setup Status</h4>
+      <ul class="status-list">
+        <li><span class="chip ok">✓</span>Key Vault secret readable locally &amp; via managed identity</li>
+        <li><span class="chip ok">✓</span>Databricks read confirmed end‑to‑end</li>
+        <li><span class="chip ok">✓</span>Email send verified locally (3/3 delivered)</li>
+        <li><span class="chip mid">…</span>Azure app settings + storage link applied, redeploy pending final verification</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<footer>ViaSmiles Email Runbook — internal engineering reference, compiled from the setup and debugging session for <code class="mono">send_customer_emails</code>.</footer>
+
+<script>
+(function(){
+  var buttons = document.querySelectorAll('.copy-btn');
+  buttons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var pre = btn.closest('.code-block').querySelector('pre');
+      var text = pre.innerText;
+      var done = function(){ var original = btn.textContent; btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = original; }, 1400); };
+      try{
+        navigator.clipboard.writeText(text).then(done, done);
+      }catch(e){ done(); }
+    });
+  });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll('.stage-nav a[href^="#"]'));
+  var sections = links.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  if('IntersectionObserver' in window && sections.length){
+    var map = new Map();
+    links.forEach(function(a, i){ if(sections[i]) map.set(sections[i], a); });
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var link = map.get(entry.target);
+        if(!link) return;
+        if(entry.isIntersecting){
+          links.forEach(function(l){ l.classList.remove('active'); });
+          link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+    sections.forEach(function(s){ observer.observe(s); });
+  }
+})();
+</script>

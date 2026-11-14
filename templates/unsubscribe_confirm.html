@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unsubscribe — ViaSmiles</title>
+<link href="https://fonts.googleapis.com/css?family=Outfit:400,500,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#182D4F; --cyan:#35C3EB; --slate:#304476;
+    --ice:#E6F3FA; --border:#D7E5ED; --bg:#EEF4F8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:0; background:var(--bg);
+    font-family:'Outfit',Arial,Helvetica,sans-serif;
+    color:var(--slate);
+  }
+  .wrap{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
+  .card{
+    width:100%; max-width:480px; background:#FFFFFF; border-radius:10px;
+    box-shadow:0 4px 24px rgba(24,45,79,0.08); overflow:hidden;
+  }
+  .card-body{padding:36px 32px 32px 32px; text-align:center;}
+  h1{margin:0 0 12px 0; font-size:22px; font-weight:600; color:var(--navy); line-height:29px;}
+  p{margin:0 0 8px 0; font-size:15px; line-height:23px;}
+  .email-pill{
+    display:inline-block; margin:14px 0 22px 0; padding:8px 16px;
+    background:var(--ice); border:1px solid var(--border); border-radius:20px;
+    font-size:14px; font-weight:500; color:var(--navy); word-break:break-all;
+  }
+  form{margin:0;}
+  button{
+    width:100%; padding:14px 20px; background:var(--cyan); color:var(--navy);
+    border:none; border-radius:6px; font-family:'Outfit',Arial,sans-serif;
+    font-size:16px; font-weight:600; cursor:pointer;
+  }
+  button:hover{background:#28b2d9;}
+  .secondary{
+    display:block; margin-top:16px; font-size:14px; color:var(--slate); text-decoration:none;
+  }
+  .secondary:hover{color:var(--navy);}
+  .error-banner{
+    margin:0 0 20px 0; padding:12px 16px; background:#FDEDED; border:1px solid #F3C6C6;
+    color:#9A3434; border-radius:6px; font-size:14px; text-align:left;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="card-body">
+      {error_banner}
+      <h1>Unsubscribe from ViaSmiles emails?</h1>
+      <p>You're about to stop future emails for:</p>
+      <div class="email-pill">{email}</div>
+      {form_block}
+    </div>
+  </div>
+</div>
+</body>
+</html>

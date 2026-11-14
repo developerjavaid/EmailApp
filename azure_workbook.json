@@ -1,0 +1,527 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# ViaSmiles Email Delivery \u2014 Deep Insights\nFilter by clinic and delivery status below; every chart and the detail grid respond to your selection. Data is live from `law-claraportemail`."
+      },
+      "name": "title"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "p-timerange",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 604800000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ],
+              "allowCustom": true
+            }
+          },
+          {
+            "id": "p-workspace",
+            "version": "KqlParameterItem/1.0",
+            "name": "Workspace",
+            "type": 5,
+            "isHiddenWhenLocked": true,
+            "value": "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+          },
+          {
+            "id": "p-clinic",
+            "version": "KqlParameterItem/1.0",
+            "name": "ClinicFilter",
+            "type": 2,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| distinct Clinic\n| order by Clinic asc",
+            "crossComponentResources": [
+              "{Workspace}"
+            ],
+            "value": [
+              "value::all"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 604800000
+            },
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces"
+          },
+          {
+            "id": "p-status",
+            "version": "KqlParameterItem/1.0",
+            "name": "StatusFilter",
+            "type": 2,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| distinct DeliveryStatus\n| order by DeliveryStatus asc",
+            "crossComponentResources": [
+              "{Workspace}"
+            ],
+            "value": [
+              "value::all"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 604800000
+            },
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces"
+          },
+          {
+            "id": "p-engagement",
+            "version": "KqlParameterItem/1.0",
+            "name": "EngagementFilter",
+            "type": 2,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "ACSEmailUserEngagementOperational\n| where TimeGenerated {TimeRange}\n| distinct EngagementType\n| order by EngagementType asc",
+            "crossComponentResources": [
+              "{Workspace}"
+            ],
+            "value": [
+              "value::all"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 604800000
+            },
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces"
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "filters"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## Key Performance Indicators"
+      },
+      "name": "heading-kpi-tiles"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let deliveredIds = ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| where DeliveryStatus == \"Delivered\"\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| where ('value::all' in ({ClinicFilter})) or (Clinic in ({ClinicFilter}))\n| distinct InternetMessageId;\nlet statusScoped = ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| where ('value::all' in ({ClinicFilter})) or (Clinic in ({ClinicFilter}));\nlet delivered = toscalar(statusScoped | where DeliveryStatus == \"Delivered\" | summarize dcount(InternetMessageId));\nlet failedBounced = toscalar(statusScoped | where DeliveryStatus in (\"Bounced\", \"Failed\") | summarize dcount(InternetMessageId));\nlet suppressed = toscalar(statusScoped | where DeliveryStatus in (\"Suppressed\", \"Quarantined\") | summarize dcount(InternetMessageId));\nlet viewed = toscalar(ACSEmailUserEngagementOperational | where TimeGenerated {TimeRange} | where EngagementType == \"View\" | where InternetMessageId in (deliveredIds) | summarize dcount(InternetMessageId));\nlet clicked = toscalar(ACSEmailUserEngagementOperational | where TimeGenerated {TimeRange} | where EngagementType == \"Click\" | where InternetMessageId in (deliveredIds) | summarize dcount(InternetMessageId));\nprint Metric = pack_array(\"Delivered\", \"Failed / Bounced\", \"Suppressed / Quarantined\", \"Viewed / Opened\", \"Clicked\"), Count = pack_array(delivered, failedBounced, suppressed, viewed, clicked)\n| mv-expand Metric to typeof(string), Count to typeof(long)",
+        "size": 3,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "tiles",
+        "tileSettings": {
+          "showBorder": true,
+          "titleContent": {
+            "columnMatch": "Metric",
+            "formatter": 1
+          },
+          "leftContent": {
+            "columnMatch": "Count",
+            "formatter": 12,
+            "formatOptions": {
+              "palette": "blue"
+            },
+            "numberFormat": {
+              "unit": 17,
+              "options": {
+                "maximumFractionDigits": 0
+              }
+            }
+          }
+        }
+      },
+      "name": "kpi-tiles"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "### Delivery Status Breakdown  \n*Click a row to filter the page by that status.*"
+      },
+      "name": "heading-kpi-clickable-grid"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let statusRows = ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| where ('value::all' in ({ClinicFilter})) or (Clinic in ({ClinicFilter}))\n| summarize Count = dcount(InternetMessageId) by DeliveryStatus\n| project Label = DeliveryStatus, ClickValue = DeliveryStatus, Count;\nlet totalRow = ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| where ('value::all' in ({ClinicFilter})) or (Clinic in ({ClinicFilter}))\n| summarize Count = dcount(InternetMessageId)\n| project Label = \"Sent (Total) - click to reset\", ClickValue = \"value::all\", Count;\ntotalRow\n| union statusRows\n| order by iff(Label == \"Sent (Total) - click to reset\", 0, 1) asc, Count desc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "Label",
+              "formatter": 7,
+              "formatterOptions": {
+                "linkTarget": "Parameter",
+                "parameterName": "StatusFilter",
+                "parameterValue": "{ClickValue}"
+              }
+            },
+            {
+              "columnMatch": "ClickValue",
+              "formatter": 5
+            },
+            {
+              "columnMatch": "Count",
+              "formatter": 12,
+              "formatOptions": {
+                "palette": "blue"
+              },
+              "numberFormat": {
+                "unit": 17,
+                "options": {
+                  "maximumFractionDigits": 0
+                }
+              }
+            }
+          ],
+          "hierarchySettings": null
+        }
+      },
+      "name": "kpi-clickable-grid"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "### Engagement Breakdown \u2014 Delivered Messages Only  \n*Click a row to filter by engagement type. Viewed/Clicked counts are distinct messages that were actually delivered.*"
+      },
+      "name": "heading-engagement-kpi-grid"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let deliveredIds = ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| where DeliveryStatus == \"Delivered\"\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| where ('value::all' in ({ClinicFilter})) or (Clinic in ({ClinicFilter}))\n| distinct InternetMessageId;\nlet deliveredCount = toscalar(deliveredIds | summarize count());\nlet engagementRows = ACSEmailUserEngagementOperational\n| where TimeGenerated {TimeRange}\n| where InternetMessageId in (deliveredIds)\n| summarize Count = dcount(InternetMessageId) by EngagementType\n| project Label = case(EngagementType == \"View\", \"Viewed / Opened\", EngagementType), ClickValue = EngagementType, Count;\nlet totalRow = print Label = \"Delivered (Total) - click to reset\", ClickValue = \"value::all\", Count = deliveredCount;\ntotalRow\n| union engagementRows\n| order by iff(Label == \"Delivered (Total) - click to reset\", 0, 1) asc, Count desc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "Label",
+              "formatter": 7,
+              "formatterOptions": {
+                "linkTarget": "Parameter",
+                "parameterName": "EngagementFilter",
+                "parameterValue": "{ClickValue}"
+              }
+            },
+            {
+              "columnMatch": "ClickValue",
+              "formatter": 5
+            },
+            {
+              "columnMatch": "Count",
+              "formatter": 12,
+              "formatOptions": {
+                "palette": "green"
+              },
+              "numberFormat": {
+                "unit": 17,
+                "options": {
+                  "maximumFractionDigits": 0
+                }
+              }
+            }
+          ]
+        }
+      },
+      "name": "engagement-kpi-grid"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "### Delivery Status Distribution"
+      },
+      "name": "heading-pie-status"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| where ('value::all' in ({ClinicFilter})) or (Clinic in ({ClinicFilter}))\n| where ('value::all' in ({StatusFilter})) or (DeliveryStatus in ({StatusFilter}))\n| summarize Count = count() by DeliveryStatus\n| order by Count desc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "piechart",
+        "chartSettings": {
+          "xAxis": "DeliveryStatus",
+          "yAxis": [
+            "Count"
+          ],
+          "showLegend": true
+        }
+      },
+      "name": "pie-status"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "### Volume by Clinic"
+      },
+      "name": "heading-pie-clinic"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| where ('value::all' in ({ClinicFilter})) or (Clinic in ({ClinicFilter}))\n| where ('value::all' in ({StatusFilter})) or (DeliveryStatus in ({StatusFilter}))\n| summarize Count = count() by Clinic\n| order by Count desc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "piechart",
+        "chartSettings": {
+          "xAxis": "Clinic",
+          "yAxis": [
+            "Count"
+          ],
+          "showLegend": true
+        }
+      },
+      "name": "pie-clinic"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "### Delivery Status by Clinic"
+      },
+      "name": "heading-column-clinic-status"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| where ('value::all' in ({ClinicFilter})) or (Clinic in ({ClinicFilter}))\n| where ('value::all' in ({StatusFilter})) or (DeliveryStatus in ({StatusFilter}))\n| summarize Count = count() by Clinic, DeliveryStatus\n| order by Clinic asc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "barchart",
+        "chartSettings": {
+          "xAxis": "Clinic",
+          "yAxis": [
+            "Count"
+          ],
+          "group": "DeliveryStatus",
+          "createOtherGroup": false,
+          "showLegend": true
+        }
+      },
+      "name": "column-clinic-status"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "### Email Volume Over Time"
+      },
+      "name": "heading-line-volume-over-time"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| where ('value::all' in ({ClinicFilter})) or (Clinic in ({ClinicFilter}))\n| where ('value::all' in ({StatusFilter})) or (DeliveryStatus in ({StatusFilter}))\n| summarize Count = count() by bin(TimeGenerated, 12h), DeliveryStatus\n| order by TimeGenerated asc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "linechart",
+        "chartSettings": {
+          "xAxis": "TimeGenerated",
+          "yAxis": [
+            "Count"
+          ],
+          "group": "DeliveryStatus",
+          "showLegend": true
+        }
+      },
+      "name": "line-volume-over-time"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "### Delivery Event Detail"
+      },
+      "name": "heading-individual-grid"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| where ('value::all' in ({ClinicFilter})) or (Clinic in ({ClinicFilter}))\n| where ('value::all' in ({StatusFilter})) or (DeliveryStatus in ({StatusFilter}))\n| project TimeGenerated, RecipientId, Clinic, DeliveryStatus, FailureReason, SmtpStatusCode\n| order by TimeGenerated desc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "DeliveryStatus",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "icons",
+                "thresholdsGrid": [
+                  {
+                    "operator": "==",
+                    "thresholdValue": "Delivered",
+                    "representation": "success",
+                    "text": "{0}"
+                  },
+                  {
+                    "operator": "Default",
+                    "thresholdValue": null,
+                    "representation": "critical",
+                    "text": "{0}"
+                  }
+                ]
+              }
+            },
+            {
+              "columnMatch": "RecipientId",
+              "formatter": 7,
+              "formatterOptions": {
+                "linkTarget": "OpenBlade",
+                "bladeOpenContext": {
+                  "bladeName": "QueryBlade",
+                  "extensionName": "Microsoft_OperationsManagementSuite_Workspace",
+                  "bladeParameters": [
+                    {
+                      "name": "q",
+                      "source": "query",
+                      "value": "ACSEmailStatusUpdateOperational\n| where isnotempty(RecipientId)\n| where RecipientId == \"{RecipientId}\"\n| order by TimeGenerated desc"
+                    },
+                    {
+                      "name": "resourceId",
+                      "value": "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "name": "individual-grid"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "### Engagement Event Detail \u2014 Delivered Messages Only"
+      },
+      "name": "heading-engagement-grid"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let deliveredIds = ACSEmailStatusUpdateOperational\n| where TimeGenerated {TimeRange}\n| where isnotempty(RecipientId)\n| where DeliveryStatus == \"Delivered\"\n| extend Clinic = strcat(SenderUsername, \"@\", SenderDomain)\n| where ('value::all' in ({ClinicFilter})) or (Clinic in ({ClinicFilter}))\n| distinct InternetMessageId;\nACSEmailUserEngagementOperational\n| where TimeGenerated {TimeRange}\n| where ('value::all' in ({EngagementFilter})) or (EngagementType in ({EngagementFilter}))\n| where InternetMessageId in (deliveredIds)\n| project TimeGenerated, RecipientId, EngagementType, InternetMessageId, UserAgent\n| order by TimeGenerated desc",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "table",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "InternetMessageId",
+              "formatter": 7,
+              "formatterOptions": {
+                "linkTarget": "OpenBlade",
+                "bladeOpenContext": {
+                  "bladeName": "QueryBlade",
+                  "extensionName": "Microsoft_OperationsManagementSuite_Workspace",
+                  "bladeParameters": [
+                    {
+                      "name": "q",
+                      "source": "query",
+                      "value": "ACSEmailUserEngagementOperational\n| where InternetMessageId == \"{InternetMessageId}\"\n| order by TimeGenerated desc"
+                    },
+                    {
+                      "name": "resourceId",
+                      "value": "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "name": "engagement-grid"
+    }
+  ],
+  "fallbackResourceIds": [
+    "/subscriptions/708f712e-9b99-4b60-b830-048e5ebdcfde/resourceGroups/devteam-projectnour-rg/providers/Microsoft.OperationalInsights/workspaces/law-claraportemail"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

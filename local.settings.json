@@ -1,0 +1,30 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "TIMER_SCHEDULE": "0 0 * * * *",
+    "APP_BASE_URL": "http://localhost:7071",
+
+    "DATABRICKS_SERVER_HOSTNAME": "adb-7405605860283973.13.azuredatabricks.net",
+    "DATABRICKS_HTTP_PATH": "/sql/1.0/warehouses/3fd364899555d7d7",
+    "DATABRICKS_CATALOG": "claraport_ws",
+    "DATABRICKS_SCHEMA": "prd_viasmiles_email",
+    "DATABRICKS_TABLE": "customer",
+    "DATABRICKS_AUTH_TYPE": "service_principal",
+    "DATABRICKS_CAMPAIGN_SCHEMA": "viasmiles_campaigns",
+    "DATABRICKS_TEST_TABLE": "customer_test",
+    "DATABRICKS_UNSUBSCRIBE_TABLE": "unsubscribe_list",
+    "TEST_MODE": "true",
+
+    "AAD_TENANT_ID": "af332e32-a9ba-4ca0-b37a-2b07a41c8f59",
+    "AAD_CLIENT_ID": "d97d0f55-a968-43a0-94c6-5d433ac05874",
+
+    "KEY_VAULT_URL": "https://email-vault.vault.azure.net/",
+
+    "ACS_SMTP_HOST": "smtp.azurecomm.net",
+    "ACS_SMTP_PORT": "587",
+    "ACS_SMTP_USERNAME": "ViaSmile-Smtp",
+    "ACS_SENDER_ADDRESS": "hello@ohioimplantsanddentures.com"
+  }
+}
